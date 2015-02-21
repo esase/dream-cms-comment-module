@@ -1,0 +1,8 @@
+<div class="comment-reply-wrapper">
+    <?php echo $this->form()->openTag($this->comment_form) ?>
+        <?php echo $this->formRow($this->comment_form->get('comment')) ?>
+        <?php echo $this->formRow($this->comment_form->get('captcha')) ?>
+        <?php echo $this->formRow($this->comment_form->get('csrf')) ?>
+        <?php echo $this->formSubmit($this->comment_form->get('submit')) ?>
+    <?php echo $this->form()->closeTag() ?>
+</div>

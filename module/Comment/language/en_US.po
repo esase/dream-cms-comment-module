@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Dream CMS \"comment\" module\n"
 "POT-Creation-Date: 2013-07-19 11:59+0600\n"
-"PO-Revision-Date: 2015-02-21 13:11+0600\n"
+"PO-Revision-Date: 2015-02-21 17:16+0600\n"
 "Last-Translator: AlexE <alexermashev@gmail.com>\n"
 "Language-Team: \n"
 "Language: English\n"
@@ -23,3 +23,9 @@ msgstr "Module allows to publish comments on the site"
 
 msgid "Comment"
 msgstr "Comment"
+
+msgid "ACL - Viewing comments"
+msgstr "Viewing comments"
+
+msgid "ACL - Adding comments"
+msgstr "Adding comments"
