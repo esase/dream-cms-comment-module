@@ -38,6 +38,9 @@ class Module
     public function getViewHelperConfig()
     {
         return [
+            'invokables' => [
+                'commentWidget' => 'Comment\View\Widget\CommentWidget'
+            ]
         ];
     }
 
