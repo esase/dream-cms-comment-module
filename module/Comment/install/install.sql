@@ -20,10 +20,27 @@ INSERT INTO `acl_resource_connection` (`role`, `resource`) VALUES
 (3, @addCommentResourceId),
 (2, @addCommentResourceId);
 
+-- application settings
+
+INSERT INTO `application_setting_category` (`name`, `module`) VALUES
+('Main settings', @moduleId);
+SET @settingsCategoryId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
+('comments_auto_approve', 'Comments auto approve', NULL, 'checkbox', NULL, 1, @settingsCategoryId, @moduleId, 1, NULL, NULL, NULL);
+SET @settingId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
+(@settingId, '1', NULL);
+
 -- system pages and widgets
 
 INSERT INTO `page_widget` (`name`, `module`, `type`, `description`, `duplicate`, `forced_visibility`, `depend_page_id`) VALUES
 ('commentWidget', @moduleId, 'public', 'Comments', NULL, NULL, NULL);
+SET @widgetId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_widget_setting` (`name`, `widget`, `label`, `type`, `required`, `order`, `category`, `description`) VALUES
+('comment_form_captcha', @widgetId, 'Show captcha', 'checkbox', NULL, 1, 1, NULL);
 
 -- module tables
 

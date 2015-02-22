@@ -18,6 +18,12 @@ class Comment extends ApplicationAbstractCustomForm
     protected $formName = 'comment';
 
     /**
+     * Captcha enabled status
+     * @va boolean
+     */
+    protected $captchaEnabled = true;
+
+    /**
      * Form elements
      * @var array
      */
@@ -43,4 +49,37 @@ class Comment extends ApplicationAbstractCustomForm
             'label' => 'Submit'
         ]
     ];
+
+    /**
+     * Get form instance
+     *
+     * @return object
+     */
+    public function getForm()
+    {
+        // get form builder
+        if (!$this->form) {
+            // remove captcha
+            if (!$this->captchaEnabled) {
+                unset($this->formElements['captcha']);
+            }
+
+            $this->form = new ApplicationCustomFormBuilder($this->formName,
+                    $this->formElements, $this->translator, $this->ignoredElements, $this->notValidatedElements, $this->method);    
+        }
+
+        return $this->form;
+    }
+
+    /**
+     * Enable captcha
+     *
+     * @param boolean $enable
+     * @return object fluent interface
+     */
+    public function enableCaptcha($enable)
+    {
+        $this->captchaEnabled = $enable;
+        return $this;
+    }
 }

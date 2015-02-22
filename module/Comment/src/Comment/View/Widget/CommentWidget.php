@@ -3,9 +3,29 @@ namespace Comment\View\Widget;
 
 use Page\View\Widget\PageAbstractWidget;
 use Acl\Service\Acl as AclService;
+use User\Service\UserIdentity as UserIdentityService;
+use Acl\Model\AclBase as AclBaseModel;
 
 class CommentWidget extends PageAbstractWidget
 {
+    /**
+     * Model instance
+     * @var object  
+     */
+    protected $model;
+
+    /**
+     * Get model
+     */
+    protected function getModel()
+    {
+        if (!$this->model) {
+            $this->model = $this->getServiceLocator()->get('Comment\Model\CommentNestedSet');
+        }
+
+        return $this->model;
+    }
+
     /**
      * Include js and css files
      *
@@ -18,43 +38,76 @@ class CommentWidget extends PageAbstractWidget
     }
 
     /**
+     * Get comment form
+     *
+     * @param boolean $validate
+     * @return array|boolean
+     */
+    protected function getCommentForm($validate = false)
+    {
+        if (AclService::checkPermission('comment_add', false)) {
+            $status = null;
+            $captchaEnabled = (int) $this->getWidgetSetting('comment_form_captcha');
+            $replyId = $this->getRequest()->getPost('reply_id'); // TODO: Check comment exsisting
+
+            $commentForm = $this->getServiceLocator()
+                ->get('Application\Form\FormManager')
+                ->getInstance('Comment\Form\Comment')
+                ->enableCaptcha($captchaEnabled);
+
+            // validate the form
+            if ($validate) {
+                // fill form with received values
+                $commentForm->getForm()->setData($this->getRequest()->getPost());
+
+                if ($commentForm->getForm()->isValid()) {
+                    // get comment status
+                    $approved = (int) $this->getSetting('comments_auto_approve') 
+                            || UserIdentityService::getCurrentUserIdentity()['role'] ==  AclBaseModel::DEFAULT_ROLE_ADMIN ? true : false;
+
+                    // add a new comment
+                    $commentId = $this->getModel()->addComment(0, 1, 2);
+
+                    $status = is_numeric($commentId)
+                        ? ($approved ? 'success' : 'disapproved')
+                        : 'error';
+                }
+            }
+
+            return [
+                'status' => $status,
+                'form' => $this->getView()->partial('comment/widget/_comment-form', [
+                    'status' => $status,
+                    'enable_captcha' => $captchaEnabled,
+                    'comment_form' => $commentForm->getForm()
+                ])
+            ];
+        }
+
+        return false;
+    }
+
+    /**
      * Get widget content
      *
      * @return string|boolean
      */
     public function getContent() 
     {
-        $viewComments = AclService::checkPermission('comment_view', false);
-        $addComments  = AclService::checkPermission('comment_add', false);
+        if (AclService::checkPermission('comment_view', false)) {
+            // process action
+            if ($this->getRequest()->isPost() && $this->getRequest()->isXmlHttpRequest()) {
+                $action = $this->getRequest()->getPost('action');
 
-        if ($viewComments || $addComments) {
-            $commentForm = null;
-
-            // get a comment form
-            if ($addComments) {
-                $commentForm = $this->getServiceLocator()
-                    ->get('Application\Form\FormManager')
-                    ->getInstance('Comment\Form\Comment');
-
-                // validate the form
-                if ($this->getRequest()->isPost() && $this->getRequest()->isXmlHttpRequest()) {
-                    // fill form with received values
-                    $commentForm->getForm()->setData($this->getRequest()->getPost());
-
-                    if ($commentForm->getForm()->isValid()) {
-                        return 'GREAt';
-                        // SHOULD IT WORK WITH AJAX OINLY ?
-                    }
-                    else {
-                        return 'no';
-                    }
+                switch ($action) {
+                    case 'add_comment' :
+                        return $this->getView()->json($this->getCommentForm(true));
                 }
             }
 
-            #AclService::checkPermission('comment_view', true);
-            return $this->getView()->partial('comment/widget/comment', [
+            return $this->getView()->partial('comment/widget/comments-list', [
                 'url' => $this->getWidgetConnectionUrl(),
-                'comment_form' => $commentForm ? $commentForm->getForm() : null
+                'comment_form' => $this->getCommentForm()['form']
             ]);
         }
 

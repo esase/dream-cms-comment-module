@@ -42,16 +42,7 @@ function Comment(options)
         // remove all erros and unset entered values
         $replyForm.find("ul").remove();
         $replyForm.find(":input:not(input[type=submit],input[name='csrf'],input[name='captcha[id]'])").val("");
-
-        // replace all ids
-        $replyForm.find("[id]").each(function() {
-            this.id = this.id + "-clone";
-        });
-
-        // replace labels
-        $replyForm.find("label").each(function() {
-            $(this).attr("for",  $(this).attr("for") + "-clone");
-        });
+        $replyForm.find(".alert").remove();
 
         return $replyForm;
     }
@@ -82,18 +73,41 @@ function Comment(options)
     }
 
     /**
-     * Init reply form
+     * Init reply forms
      *
      * @return void
      */
-    var initReplyForm = function()
+    var initReplyForms = function()
     {
         $(globalCommentsWrapper).find("form").off().on("submit", function(e) {
             e.preventDefault();
+            var $form = this;
+
+            // collect extra params
+            var extraExtions = "&action=add_comment";
+            var replyId = $(this).parents(".media:first").attr("comment-id");
+
+            if (typeof replyId != "undefined") {
+                extraExtions += "&reply_id=" + replyId;
+            }
 
             // send a form data
-            $.post(addCommentUrl, $(this).serialize(), function(data) {
-            });
+            ajaxQuery($($form).parent(), addCommentUrl, function(data) {
+                data = $.parseJSON(data);
+
+                // reload the current form
+                if (data.status != "success") {
+                    $($form).replaceWith(data.form);
+                    initReplyForms();
+                }
+                else {
+                    // show a message and remove the reply form
+                    var $formParents = $($form).parents(replylinkWrapper + ":first");
+
+                    $formParents.find("a").removeClass("active-reply");
+                    $formParents.find(replyWrapper).remove();                    
+                }
+            }, 'post', $(this).serialize() + extraExtions, false);
         });
     }
 
@@ -103,6 +117,6 @@ function Comment(options)
     this.init = function()
     {
         initReplyLinks();
-        initReplyForm();
+        initReplyForms();
     }
 }

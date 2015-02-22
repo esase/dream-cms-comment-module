@@ -18,14 +18,14 @@ return [
     'module_depends' => [
     ],
     'clear_caches' => [
-        'setting'       => false,
+        'setting'       => true,
         'time_zone'     => false,
         'admin_menu'    => false,
-        'js_cache'      => false,
-        'css_cache'     => false,
+        'js_cache'      => true,
+        'css_cache'     => true,
         'layout'        => false,
         'localization'  => false,
-        'page'          => false,
+        'page'          => true,
         'user'          => false,
         'xmlrpc'        => false
     ],

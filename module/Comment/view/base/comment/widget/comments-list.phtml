@@ -1,16 +1,9 @@
 <div id="global-comments-wrapper">
-
     <?php if ($this->comment_form): ?>
         <div class="comment-reply-wrapper">
-            <?php echo $this->form()->openTag($this->comment_form) ?>
-                <?php echo $this->formRow($this->comment_form->get('comment')) ?>
-                <?php echo $this->formRow($this->comment_form->get('captcha')) ?>
-                <?php echo $this->formRow($this->comment_form->get('csrf')) ?>
-                <?php echo $this->formSubmit($this->comment_form->get('submit')) ?>
-            <?php echo $this->form()->closeTag() ?>
+            <?php echo $this->comment_form ?>
         </div>
     <?php endif ?>
-
     <div id="comments-list-wrapper">
         <div class="media" comment-id="1">
             <div class="media-left">
@@ -85,13 +78,23 @@
         background-color: #F5F5F5;
         padding:15px;
         margin-bottom:15px;
+        position: relative;
     }
 
-    div#global-comments-wrapper div#comments-list-wrapper div.comment-reply-wrapper {
-        margin-bottom:0;
+    div#global-comments-wrapper div.comment-reply-wrapper .form-control {
+        font-weight:normal;
     }
 
-    div#global-comments-wrapper div#comments-list-wrapper div.comment-reply-wrapper img#captcha-image-clone {
+    div#global-comments-wrapper div.comment-reply-wrapper hr {
         margin-bottom:10px;
+    }
+
+    div#global-comments-wrapper div.comment-reply-wrapper span {
+        display: block;
+    }
+
+    div#global-comments-wrapper div.comment-reply-wrapper img {
+        margin-bottom:10px;
+        margin-top:10px;
     }
 </style>
