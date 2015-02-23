@@ -22,7 +22,9 @@ class CommentWidget extends PageAbstractWidget
     protected function getModel()
     {
         if (!$this->model) {
-            $this->model = $this->getServiceLocator()->get('Comment\Model\CommentNestedSet');
+            $this->model = $this->getServiceLocator()
+                ->get('Application\Model\ModelManager')
+                ->getInstance('Comment\Model\CommentWidget');
         }
 
         return $this->model;
@@ -62,12 +64,12 @@ class CommentWidget extends PageAbstractWidget
             if ($validate) {
                 // get a new comment settings
                 $replyId = $this->getRequest()->getPost('reply_id', null);
-                $pageSlug = !empty(PageService::getCurrentPage()['pages_provider']) ? $this->getSlug() : null;
                 $replyComment = false;
 
                 // get a reply comment info
                 if ($replyId) {
-                    $replyComment = $this->getModel()->getCommentInfo($replyId, $this->pageId, $pageSlug);
+                    $replyComment = $this->getModel()->
+                            getCommentModel()->getCommentInfo($replyId, $this->pageId, $this->getPageSlug());
                 }
 
                 // the reply comment don't exsist
@@ -92,7 +94,7 @@ class CommentWidget extends PageAbstractWidget
                             'comment' => $commentForm->getForm()->getData()['comment'],
                             'active' => $commentActive,
                             'page_id' => $this->pageId,
-                            'slug' => $pageSlug,
+                            'slug' => $this->getPageSlug(),
                             'user_id' => !UserIdentityService::isGuest()
                                 ? UserIdentityService::getCurrentUserIdentity()['user_id']
                                 : null
@@ -100,16 +102,23 @@ class CommentWidget extends PageAbstractWidget
 
                         // add a new comment
                         if ($replyComment) {
-                            $commentId = $this->getModel()->addComment($data, $this->
-                                    pageId, $pageSlug, $replyComment['level'], $replyComment['left_key'], $replyComment['right_key']);
+                            $commentId = $this->getModel()->getCommentModel()->addComment($data, $this->
+                                    pageId, $this->getPageSlug(), $replyComment['level'], $replyComment['left_key'], $replyComment['right_key']);
                         }
                         else {
-                            $commentId = $this->getModel()->addComment($data, $this->pageId, $pageSlug);
+                            $commentId = $this->getModel()->getCommentModel()->addComment($data, $this->pageId, $this->getPageSlug());
                         }
 
-                        $commentStatus = is_numeric($commentId)
-                            ? ($commentActive ? 'success' : 'disapproved')
-                            : 'error';
+                        // return a status
+                        if (is_numeric($commentId)) {
+                            $commentStatus = $commentActive ? 'success' : 'disapproved';
+
+                            // increase ACL track
+                            AclService::checkPermission('comment_add');
+                        }
+                        else {
+                            $commentStatus = 'error';
+                        }
                     }
                 }
             }
@@ -146,13 +155,83 @@ class CommentWidget extends PageAbstractWidget
                 }
             }
 
+            // get a comment form
             $commentForm = $this->getCommentForm();
+
             return $this->getView()->partial('comment/widget/comments-list', [
                 'base_url' => $this->getWidgetConnectionUrl(),
-                'comment_form' => false !== $commentForm ? $commentForm['form'] : null
+                'comment_form' => false !== $commentForm ? $commentForm['form'] : null,
+                'comments' => $this->getCommentsList()
             ]);
         }
 
         return false;
+    }
+
+    /**
+     * Get comments list
+     *
+     * @return string
+     */
+    protected function getCommentsList()
+    {
+        // get a pagination page number
+        $pageParamName = 'page_' . $this->widgetConnectionId;
+        $page = $this->getView()->applicationRoute()->getQueryParam($pageParamName , 1);
+
+        if (null != ($commentsList = $this->processComments($this->
+                getModel()->getCommentsTree($this->pageId, $this->getPageSlug(), $page)))) {
+
+            // increase ACL track
+            AclService::checkPermission('comment_view');
+        }
+
+        return $commentsList;
+    }
+
+    /**
+     * Process comments
+     *
+     * @param array $comments
+     * @return string
+     */
+    protected function processComments(array $comments)
+    {
+        $processedComments = null;
+
+        if (count($comments)) {
+            foreach ($comments as $comment) {
+                if ($comment['active'] != CommentNestedSet::COMMENT_STATUS_ACTIVE) {
+                    continue;
+                }
+
+                $processedComments .= $this->getView()->partial('comment/widget/_comment-item-start', [
+                    'id' => $comment['id'],
+                    'comment' => $comment['comment']
+                ]);
+
+                // check for children
+                if (!empty($comment['children'])) {
+                    $processedComments .= $this->processComments($comment['children']);
+                }
+
+                $processedComments .= $this->getView()->partial('comment/widget/_comment-item-end');
+            }
+            
+            
+            return $processedComments;
+        }
+
+        return $processedComments;
+    }
+
+    /**
+     * Get page slug
+     *
+     * @return string|integer
+     */
+    protected function getPageSlug()
+    {
+        return !empty(PageService::getCurrentPage()['pages_provider']) ? $this->getSlug() : null;
     }
 }
