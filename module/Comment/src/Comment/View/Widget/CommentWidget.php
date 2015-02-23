@@ -1,10 +1,12 @@
 <?php
 namespace Comment\View\Widget;
 
-use Page\View\Widget\PageAbstractWidget;
-use Acl\Service\Acl as AclService;
-use User\Service\UserIdentity as UserIdentityService;
 use Acl\Model\AclBase as AclBaseModel;
+use Acl\Service\Acl as AclService;
+use Comment\Model\CommentNestedSet;
+use Page\Service\Page as PageService;
+use Page\View\Widget\PageAbstractWidget;
+use User\Service\UserIdentity as UserIdentityService;
 
 class CommentWidget extends PageAbstractWidget
 {
@@ -46,10 +48,11 @@ class CommentWidget extends PageAbstractWidget
     protected function getCommentForm($validate = false)
     {
         if (AclService::checkPermission('comment_add', false)) {
-            $status = null;
+            // get comment form settings
             $captchaEnabled = (int) $this->getWidgetSetting('comment_form_captcha');
-            $replyId = $this->getRequest()->getPost('reply_id'); // TODO: Check comment exsisting
+            $commentStatus = '';
 
+            // get comment form
             $commentForm = $this->getServiceLocator()
                 ->get('Application\Form\FormManager')
                 ->getInstance('Comment\Form\Comment')
@@ -57,27 +60,64 @@ class CommentWidget extends PageAbstractWidget
 
             // validate the form
             if ($validate) {
-                // fill form with received values
-                $commentForm->getForm()->setData($this->getRequest()->getPost());
+                // get a new comment settings
+                $replyId = $this->getRequest()->getPost('reply_id', null);
+                $pageSlug = !empty(PageService::getCurrentPage()['pages_provider']) ? $this->getSlug() : null;
+                $replyComment = false;
 
-                if ($commentForm->getForm()->isValid()) {
-                    // get comment status
-                    $approved = (int) $this->getSetting('comments_auto_approve') 
-                            || UserIdentityService::getCurrentUserIdentity()['role'] ==  AclBaseModel::DEFAULT_ROLE_ADMIN ? true : false;
+                // get a reply comment info
+                if ($replyId) {
+                    $replyComment = $this->getModel()->getCommentInfo($replyId, $this->pageId, $pageSlug);
+                }
+
+                // the reply comment don't exsist
+                if ($replyId && (!$replyComment
+                        || $replyComment['active'] != CommentNestedSet::COMMENT_STATUS_ACTIVE)) {
+
+                    $commentStatus = 'error';
+                }
+                else {
+                    // fill form with received values
+                    $commentForm->getForm()->setData($this->getRequest()->getPost());
 
                     // add a new comment
-                    $commentId = $this->getModel()->addComment(0, 1, 2);
+                    if ($commentForm->getForm()->isValid()) {
+                        $commentActive = (int) $this->getSetting('comments_auto_approve')
+                            || UserIdentityService::getCurrentUserIdentity()['role'] ==  AclBaseModel::DEFAULT_ROLE_ADMIN
+                                    ? CommentNestedSet::COMMENT_STATUS_ACTIVE
+                                    : CommentNestedSet::COMMENT_STATUS_NOT_ACTIVE;
 
-                    $status = is_numeric($commentId)
-                        ? ($approved ? 'success' : 'disapproved')
-                        : 'error';
+                        // comment's data
+                        $data = [
+                            'comment' => $commentForm->getForm()->getData()['comment'],
+                            'active' => $commentActive,
+                            'page_id' => $this->pageId,
+                            'slug' => $pageSlug,
+                            'user_id' => !UserIdentityService::isGuest()
+                                ? UserIdentityService::getCurrentUserIdentity()['user_id']
+                                : null
+                        ];
+
+                        // add a new comment
+                        if ($replyComment) {
+                            $commentId = $this->getModel()->addComment($data, $this->
+                                    pageId, $pageSlug, $replyComment['level'], $replyComment['left_key'], $replyComment['right_key']);
+                        }
+                        else {
+                            $commentId = $this->getModel()->addComment($data, $this->pageId, $pageSlug);
+                        }
+
+                        $commentStatus = is_numeric($commentId)
+                            ? ($commentActive ? 'success' : 'disapproved')
+                            : 'error';
+                    }
                 }
             }
 
             return [
-                'status' => $status,
+                'status' => $commentStatus,
                 'form' => $this->getView()->partial('comment/widget/_comment-form', [
-                    'status' => $status,
+                    'status' => $commentStatus,
                     'enable_captcha' => $captchaEnabled,
                     'comment_form' => $commentForm->getForm()
                 ])
@@ -95,19 +135,21 @@ class CommentWidget extends PageAbstractWidget
     public function getContent() 
     {
         if (AclService::checkPermission('comment_view', false)) {
-            // process action
+            // process comments actions
             if ($this->getRequest()->isPost() && $this->getRequest()->isXmlHttpRequest()) {
                 $action = $this->getRequest()->getPost('action');
 
                 switch ($action) {
                     case 'add_comment' :
+                        // validate and add a new comment
                         return $this->getView()->json($this->getCommentForm(true));
                 }
             }
 
+            $commentForm = $this->getCommentForm();
             return $this->getView()->partial('comment/widget/comments-list', [
-                'url' => $this->getWidgetConnectionUrl(),
-                'comment_form' => $this->getCommentForm()['form']
+                'base_url' => $this->getWidgetConnectionUrl(),
+                'comment_form' => false !== $commentForm ? $commentForm['form'] : null
             ]);
         }
 

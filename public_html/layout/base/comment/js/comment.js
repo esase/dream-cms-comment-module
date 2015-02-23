@@ -1,10 +1,10 @@
 function Comment(options)
 {
     /**
-     * Add comment url
+     * Base url
      * @var string
      */
-    var addCommentUrl = options['add_comment'];
+    var baseUrl = options['base_url'];
 
     /**
      * Global comments wrapper
@@ -92,20 +92,29 @@ function Comment(options)
             }
 
             // send a form data
-            ajaxQuery($($form).parent(), addCommentUrl, function(data) {
+            ajaxQuery($($form).parent(), baseUrl, function(data) {
                 data = $.parseJSON(data);
 
-                // reload the current form
-                if (data.status != "success") {
-                    $($form).replaceWith(data.form);
-                    initReplyForms();
+                // permission denied
+                if (data === false) {
+                    // remove all opened reply wrappers
+                    var $globalWrapper = $($form).parents(globalCommentsWrapper);
+                    $globalWrapper.find(replyWrapper).remove();
+                    $globalWrapper.find(replylinkWrapper).remove();
                 }
                 else {
-                    // show a message and remove the reply form
-                    var $formParents = $($form).parents(replylinkWrapper + ":first");
-
-                    $formParents.find("a").removeClass("active-reply");
-                    $formParents.find(replyWrapper).remove();                    
+                    // reload the current form
+                    if (data.status != "success") {
+                        $($form).replaceWith(data.form);
+                        initReplyForms();
+                    }
+                    else {
+                        // show a message and remove the reply form
+                        var $formParents = $($form).parents(replylinkWrapper + ":first");
+    
+                        $formParents.find("a").removeClass("active-reply");
+                        $formParents.find(replyWrapper).remove();                    
+                    }
                 }
             }, 'post', $(this).serialize() + extraExtions, false);
         });
