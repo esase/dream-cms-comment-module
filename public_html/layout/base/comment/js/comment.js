@@ -31,6 +31,12 @@ function Comment(options)
     var replylinkWrapper = ".reply-link-wrapper";
 
     /**
+     * Paginator wrapper
+     * @var string
+     */
+    var paginatorWrapper = "#comments-paginator-wrapper";
+
+    /**
      * Clone reply form
      *
      * @return object
@@ -82,41 +88,59 @@ function Comment(options)
         $(globalCommentsWrapper).find("form").off().on("submit", function(e) {
             e.preventDefault();
             var $form = this;
+            var formUrl = baseUrl + "&action=add_comment";
 
             // collect extra params
-            var extraExtions = "&action=add_comment";
             var replyId = $(this).parents(".media:first").attr("comment-id");
 
             if (typeof replyId != "undefined") {
-                extraExtions += "&reply_id=" + replyId;
+                formUrl += "&reply_id=" + replyId;
             }
 
             // send a form data
-            ajaxQuery($($form).parent(), baseUrl, function(data) {
+            ajaxQuery($($form).parent(), formUrl, function(data) {
                 data = $.parseJSON(data);
 
                 // permission denied
                 if (data === false) {
+                    // TODO: SHOW AN EXCEPTION
                     // remove all opened reply wrappers
                     var $globalWrapper = $($form).parents(globalCommentsWrapper);
                     $globalWrapper.find(replyWrapper).remove();
                     $globalWrapper.find(replylinkWrapper).remove();
                 }
                 else {
-                    // reload the current form
-                    if (data.status != "success") {
-                        $($form).replaceWith(data.form);
-                        initReplyForms();
-                    }
-                    else {
-                        // show a message and remove the reply form
-                        var $formParents = $($form).parents(replylinkWrapper + ":first");
-    
+                    var $formParents = $($form).parents(replylinkWrapper + ":first");
+
+                    // remove the reply form
+                    if ($formParents.length && data.status == "success") {
                         $formParents.find("a").removeClass("active-reply");
-                        $formParents.find(replyWrapper).remove();                    
+                        $formParents.find(replyWrapper).remove();
+                        return;
                     }
+
+                    // reload the current form
+                    $($form).replaceWith(data.form);
+                    initReplyForms();
                 }
-            }, 'post', $(this).serialize() + extraExtions, false);
+            }, 'post', $(this).serialize(), false);
+        });
+    }
+
+    /**
+     * Init paginator
+     */
+    var initPaginator = function()
+    {
+        $(globalCommentsWrapper).find(paginatorWrapper).off().bind("click", function(e) {
+            e.preventDefault();
+            var lastCommentId = $(globalCommentsWrapper).find(".media:last").attr("comment-id");
+            var paginatorUrl = baseUrl + "&action=get_comments&last_comment=" + lastCommentId;
+
+            // get next comments
+            ajaxQuery($(commentsListWrapper), paginatorUrl, function(data) {
+                alert(data);
+            }, 'get', '', false);
         });
     }
 
@@ -127,5 +151,6 @@ function Comment(options)
     {
         initReplyLinks();
         initReplyForms();
+        initPaginator();
     }
 }

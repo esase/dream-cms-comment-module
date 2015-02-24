@@ -47,7 +47,8 @@ INSERT INTO `page_widget_setting` (`name`, `widget`, `label`, `type`, `required`
 CREATE TABLE `comment_list` (
     `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `comment` TEXT NOT NULL,
-    `active` TINYINT(1) UNSIGNED NULL  DEFAULT '1', 
+    `active` TINYINT(1) UNSIGNED NULL DEFAULT '1',
+    `hidden` TINYINT(1) UNSIGNED NULL DEFAULT '1',
     `page_id` SMALLINT(5) UNSIGNED NOT NULL,
     `slug` VARCHAR(255) DEFAULT NULL,
     `user_id` INT(10) UNSIGNED DEFAULT NULL,
@@ -58,7 +59,7 @@ CREATE TABLE `comment_list` (
     `created` INT(10) UNSIGNED NOT NULL,
     PRIMARY KEY (`id`),
     KEY `node` (`left_key`, `right_key`, `page_id`, `slug`, `active`, `level`),
-    KEY `page` (`page_id`, `slug`, `active`),
+    KEY `comment` (`page_id`, `slug`, `hidden`, `right_key`),
     FOREIGN KEY (`page_id`) REFERENCES `page_structure`(`id`)
         ON UPDATE CASCADE
         ON DELETE CASCADE,

@@ -1,48 +1,55 @@
 <?php
 namespace Comment\Model;
 
-use Application\Utility\ApplicationPagination as PaginationUtility;
-use Application\Service\ApplicationSetting as SettingService;
-use Zend\Paginator\Adapter\DbSelect as DbSelectPaginator;
-use Zend\Paginator\Paginator;
+use Zend\Db\ResultSet\ResultSet;
 
 class CommentWidget extends CommentBase
 {
     /**
-     * Get comments tree
+     * Get comments
      *
      * @param integer $pageId
      * @param string $pageSlug
-     * @param integer $page
-     * @param integer $perPage
+     * @param integer $limit
+     * @param boolean $getTree
+     * @param integer $lastRightKey
      * @return array
      */
-    public function getCommentsTree($pageId, $pageSlug = null, $page = 1, $perPage = 0)
+    public function getComments($pageId, $pageSlug = null, $limit, $getTree = true, $lastRightKey = null)
     {
-        $commentsTree = [];
-
         $select = $this->select();
         $select->from('comment_list')
             ->columns([
                 'id',
                 'comment',
-                'active',
                 'parent_id'
             ])
-            ->order($this->getCommentModel()->getLeftKey());
+            ->where([
+                'page_id' => $pageId,
+                'slug' => $pageSlug,
+                'hidden' => CommentNestedSet::COMMENT_STATUS_NOT_HIDDEN
+            ])
+            ->limit($limit)
+            ->order($this->getCommentModel()->getRightKey() . ' desc');
 
-        $paginator = new Paginator(new DbSelectPaginator($select, $this->adapter));
-        $paginator->setCurrentPageNumber($page);
-        $paginator->setItemCountPerPage(PaginationUtility::processPerPage($perPage));
-        $paginator->setPageRange(SettingService::getSetting('application_page_range'));
-
-        if ($paginator->count()) {
-            foreach ($paginator as $comment) {
-                $this->processCommentsTree($commentsTree, (array) $comment);
-            }
+        if ($lastRightKey) {
+            $select->where->lessThan($this->getCommentModel()->getRightKey(), $lastRightKey);
         }
 
-        return $commentsTree;
+        $statement = $this->prepareStatementForSqlObject($select);
+        $resultSet = new ResultSet;
+        $resultSet->initialize($statement->execute());
+
+        if ($getTree && count($resultSet)) {
+            $commentsTree = [];
+            foreach ($resultSet as $comment) {
+                $this->processCommentsTree($commentsTree, $comment);
+            }
+
+            return $commentsTree;
+        }
+
+        return $resultSet->toArray();
     }
 
     /**
@@ -71,5 +78,5 @@ class CommentWidget extends CommentBase
                 $this->processCommentsTree($commentOptions['children'], $currentComment);
             }
         }
-    }
+    }    
 }

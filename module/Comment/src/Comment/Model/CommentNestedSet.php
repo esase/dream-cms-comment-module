@@ -14,7 +14,17 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
     /**
      * Comment status not active 
      */
-    const COMMENT_STATUS_NOT_ACTIVE = 0;
+    const COMMENT_STATUS_NOT_ACTIVE = null;
+
+    /**
+     * Comment status hidden 
+     */
+    const COMMENT_STATUS_HIDDEN = 1;
+
+    /**
+     * Comment status not hidden
+     */
+    const COMMENT_STATUS_NOT_HIDDEN = null;
 
     /**
      * Get comment info
@@ -28,14 +38,9 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
     {
         return $this->getNodeInfo($id, null, function (Select $select) use ($pageId, $slug) {
             $select->where([
-                'page_id' => $pageId
+                'page_id' => $pageId,
+                'slug' => $slug
             ]);
-
-            if ($slug) {
-                $select->where([
-                    'slug' => $slug
-                ]);
-            }
 
             return $select;
         });
@@ -44,41 +49,61 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
     /**
      * Add comment
      *
-     * @param array $data
-     *      string comment
-     *      string status
-     *      integer page_id
-     *      string slug
-     *      integer user_id
+     * @param boolean $approved
+     * @param string $comment
      * @param integer $pageId
      * @param string $slug
-     * @param integer $parentLevel
-     * @param integer $parentLeftKey
-     * @param integer $parentRightKey
+     * @param integer $userId
+     * @param integer $replyId
      * @return integer|string
      */
-    public function addComment($data, $pageId, $slug = null, $parentLevel = 0, $parentLeftKey = 0, $parentRightKey = 1)
+    public function addComment($approved, $comment, $pageId, $slug = null, $userId = null, $replyId = null)
     {
-        // TODO: FIRE AN EVENT AND SEND NOTIFICATION ABOUT NEW COMMENT
+        $replyComment = false;
+
+        // get a reply comment info
+        if ($replyId) {
+            $replyComment = $this->getCommentInfo($replyId, $pageId, $slug);
+        }
+
+        // the reply comment don't exsist or not active
+        if ($replyId && (!$replyComment
+                || $replyComment['active'] == CommentNestedSet::COMMENT_STATUS_NOT_ACTIVE
+                || $replyComment['hidden'] == CommentNestedSet::COMMENT_STATUS_HIDDEN)) {
+
+            return;
+        }
+
         $filter = [
             'page_id' =>  $pageId,
             'slug' => $slug
         ];
 
-        $data = array_merge($data, [
+        $data = [
+            'active' => $approved,
+            'hidden' => $approved == self::COMMENT_STATUS_NOT_ACTIVE
+                ? self::COMMENT_STATUS_HIDDEN
+                : self::COMMENT_STATUS_NOT_HIDDEN,
+            'comment' => $comment,
+            'page_id' => $pageId,
+            'slug' => $slug,
+            'user_id' => $userId,
             'created' => time()
-        ]);
+        ];
 
-        $lastRightNode = !$parentLevel
-            ? $this->getLastNode($filter)
-            : $this->getLastNode($filter, $parentLeftKey, $parentRightKey);
+        $parentLevel   = $replyComment ? $replyComment['level']    : 0;
+        $parentLeftKey = $replyComment ? $replyComment['left_key'] : 0;
 
-        // add a comment to the end 
-        if ($lastRightNode) {
-            return $this->insertNode($parentLevel, $lastRightNode, $data, $filter);
+        // add reply comments to the start
+        if ($parentLevel) {
+            return $this->insertNodeToStart($parentLevel, $parentLeftKey, $data, $filter); 
         }
 
-        // add comment to the start
-        return $this->insertNodeToStart($parentLevel, $parentLeftKey, $data, $filter);        
+        $lastRightNode = $this->getLastNode($filter);
+
+        // add a comment to the end 
+        return $lastRightNode
+            ? $this->insertNode($parentLevel, $lastRightNode, $data, $filter)
+            : $this->insertNodeToStart($parentLevel, $parentLeftKey, $data, $filter);        
     }
 }
