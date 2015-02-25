@@ -49,10 +49,12 @@ class CommentWidget extends PageAbstractWidget
      */
     protected function getCommentForm($validate = false)
     {
+        //return false;
         if (AclService::checkPermission('comment_add', false)) {
             // get comment form settings
             $captchaEnabled = (int) $this->getWidgetSetting('comment_form_captcha');
             $commentStatus = '';
+            $commentInfo   = '';
 
             // get comment form
             $commentForm = $this->getServiceLocator()
@@ -101,6 +103,7 @@ class CommentWidget extends PageAbstractWidget
             }
 
             return [
+                'comment' => $commentInfo && $commentStatus == 'success' ? $this->processComments([$commentInfo], true) : '',
                 'status' => $commentStatus,
                 'form' => $this->getView()->partial('comment/widget/_comment-form', [
                     'status' => $commentStatus,
@@ -120,6 +123,8 @@ class CommentWidget extends PageAbstractWidget
      */
     public function getContent() 
     {
+        // TODO: 1. Get a comment content after adding. 1.1 Show empty block 2. Test with disapprove. 3. Add System event. 4. Test ACL AGAIN!
+        //return false;
         if (AclService::checkPermission('comment_view', false)) {
             // process actions
             if (false !== ($action = $this->
@@ -128,14 +133,19 @@ class CommentWidget extends PageAbstractWidget
                 switch ($action) {
                     case 'get_comments' :
                         // get the comment info
+                        $ownReplies = $this->getRequest()->getPost('own_replies', null);
                         $lastCommentId = $this->getRequest()->getQuery('last_comment', -1);
                         $commentInfo = $this->getModel()->
                                 getCommentModel()->getCommentInfo($lastCommentId, $this->pageId, $this->getPageSlug());
 
                         if ($commentInfo) {
+                            $leftComments = $this->getModel()->getCommentsCount($this->pageId, $this->
+                                    getPageSlug(), $commentInfo[$this->getModel()->getCommentModel()->getRightKey()], $ownReplies);
+
                             return $this->getView()->json([
+                                'show_paginator' => $leftComments - (int) $this->getWidgetSetting('comment_per_page') > 0,
                                 'comments' => $this->getCommentsList(false,
-                                        $commentInfo[$this->getModel()->getCommentModel()->getRightKey()], true)
+                                        $commentInfo[$this->getModel()->getCommentModel()->getRightKey()], true, $ownReplies)
                             ]);
                         }
                         break;
@@ -155,7 +165,9 @@ class CommentWidget extends PageAbstractWidget
             return $this->getView()->partial('comment/widget/comments-list', [
                 'base_url' => $this->getWidgetConnectionUrl(),
                 'comment_form' => false !== $commentForm ? $commentForm['form'] : null,
-                'comments' => $this->getCommentsList()
+                'comments' => $this->getCommentsList(),
+                'show_paginator' => $this->getModel()->getCommentsCount($this->
+                        pageId, $this->getPageSlug()) > (int) $this->getWidgetSetting('comment_per_page')
             ]);
         }
 
@@ -168,13 +180,17 @@ class CommentWidget extends PageAbstractWidget
      * @param boolean $getTree
      * @param integer $lastRightKey
      * @param boolean $asArray
+     * @param array $ownReplies
      * @return string|array
      */
-    protected function getCommentsList($getTree = true, $lastRightKey = null, $asArray = false)
+    protected function getCommentsList($getTree = true, $lastRightKey = null, $asArray = false, $ownReplies = null)
     {
-        if (null != ($commentsList = $this->processComments($this->getModel()->
-                getComments($this->pageId, $this->getPageSlug(), 1, $getTree, $lastRightKey), $asArray))) {
+        // get comments
+        $commentsList = $this->getModel()->getComments($this->pageId, $this->
+                getPageSlug(), (int) $this->getWidgetSetting('comment_per_page'), $getTree, $lastRightKey, $ownReplies);
 
+        // process comments
+        if (null != ($commentsList = $this->processComments($commentsList, $asArray))) {
             // increase ACL track
             AclService::checkPermission('comment_view');
         }
@@ -193,26 +209,29 @@ class CommentWidget extends PageAbstractWidget
         $processedComments = null;
 
         if (count($comments)) {
+            // process comments
             foreach ($comments as $comment) {
-                if ($asArray) {
-                    //$processedComments[$comment['id']]
+                $content = $this->getView()->partial('comment/widget/_comment-item-start', [
+                    'id' => $comment['id'],
+                    'comment' => $comment['comment']
+                ]);
+
+                // check for children
+                if (!$asArray && !empty($comment['children'])) {
+                    $content .= $this->processComments($comment['children']);
                 }
-                else {
-                    $processedComments .= $this->getView()->partial('comment/widget/_comment-item-start', [
+
+                $content .= $this->getView()->partial('comment/widget/_comment-item-end');
+
+                // collect proccessed comments
+                !$asArray
+                    ? $processedComments .= $content
+                    : $processedComments[] = [
                         'id' => $comment['id'],
-                        'comment' => $comment['comment']
-                    ]);
-
-                    // check for children
-                    if (!empty($comment['children'])) {
-                        $processedComments .= $this->processComments($comment['children']);
-                    }
-
-                    $processedComments .= $this->getView()->partial('comment/widget/_comment-item-end');
-                }
+                        'parent_id' => $comment['parent_id'],
+                        'comment' => $content
+                    ];
             }
-
-            return $processedComments;
         }
 
         return $processedComments;

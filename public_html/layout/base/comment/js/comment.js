@@ -13,10 +13,22 @@ function Comment(options)
     var globalCommentsWrapper = "#global-comments-wrapper";
 
     /**
-     * Reply comment wrapper
+     * Action denied wrapper
      * @var string
      */
-    var replyWrapper = ".comment-reply-wrapper";
+    var actionDeniedWrapper = "#comments-action-denied";
+
+    /**
+     * Reply comment form wrapper
+     * @var string
+     */
+    var replyFormWrapper = ".comment-reply-form-wrapper";
+
+    /**
+     * Replies wrapper
+     * @var string
+     */
+    var repliesWrapper = '.comment-replies';
 
     /**
      * Comments list wrapper
@@ -37,13 +49,35 @@ function Comment(options)
     var paginatorWrapper = "#comments-paginator-wrapper";
 
     /**
+     * Own replies
+     * @var object
+     */
+    //var ownReplies = {};
+
+    /**
+     * Last comment id
+     * @var integer
+     */
+    var lastCommentId;
+
+    /**
+     * Show action denied
+     *
+     * @return void
+     */
+    var showActionDenied = function()
+    {
+        $(globalCommentsWrapper + " > " + actionDeniedWrapper).show();
+    }
+
+    /**
      * Clone reply form
      *
      * @return object
      */
     var cloneReplyForm = function()
     {
-        var $replyForm = $(globalCommentsWrapper + " > " + replyWrapper).clone(true);
+        var $replyForm = $(globalCommentsWrapper + " > " + replyFormWrapper).clone(true);
 
         // remove all erros and unset entered values
         $replyForm.find("ul").remove();
@@ -66,16 +100,29 @@ function Comment(options)
 
             if ($(this).hasClass("active-reply")) {
                 // delete the reply form
-                $(this).removeClass("active-reply").parents(replylinkWrapper).find(replyWrapper).remove();
+                $(this).removeClass("active-reply").parents(replylinkWrapper).find(replyFormWrapper).remove();
             }
             else {
                 // close a previously opened reply form
-                $(globalCommentsWrapper + " " + commentsListWrapper + " " + replyWrapper).remove();
+                $(globalCommentsWrapper + " " + commentsListWrapper + " " + replyFormWrapper).remove();
                 $(globalCommentsWrapper + " " + commentsListWrapper + " " + replylinkWrapper + " a").removeClass("active-reply");
 
                 $(this).addClass("active-reply").parents(replylinkWrapper).append(cloneReplyForm()).html();
             }
         });
+    }
+
+    /**
+     * Close reply form
+     *
+     * @param object $form
+     * @return void
+     */
+    var closeReplyForms = function($form)
+    {
+        var $globalWrapper = $($form).parents(globalCommentsWrapper);
+        $globalWrapper.find(replyFormWrapper).remove();
+        $globalWrapper.find(replylinkWrapper).remove();
     }
 
     /**
@@ -99,29 +146,38 @@ function Comment(options)
 
             // send a form data
             ajaxQuery($($form).parent(), formUrl, function(data) {
-                data = $.parseJSON(data);
+                if (data) {
+                    data = $.parseJSON(data);
 
-                // permission denied
-                if (data === false) {
-                    // TODO: SHOW AN EXCEPTION
-                    // remove all opened reply wrappers
-                    var $globalWrapper = $($form).parents(globalCommentsWrapper);
-                    $globalWrapper.find(replyWrapper).remove();
-                    $globalWrapper.find(replylinkWrapper).remove();
+                    // permission denied
+                    if (data === false) {
+                        closeReplyForms($form);
+                        showActionDenied();
+                    }
+                    else {
+                        // add received comment
+                        if (data.comment) {
+                            addComments(data.comment, true);
+                        }
+
+                        var $formParents = $($form).parents(replylinkWrapper + ":first");
+
+                        // remove the reply form
+                        if ($formParents.length && data.status == "success") {
+                            $formParents.find("a").removeClass("active-reply");
+                            $formParents.find(replyFormWrapper).remove();
+
+                            return;
+                        }
+
+                        // reload the current form
+                        $($form).replaceWith(data.form);
+                        initReplyForms();
+                    }
                 }
                 else {
-                    var $formParents = $($form).parents(replylinkWrapper + ":first");
-
-                    // remove the reply form
-                    if ($formParents.length && data.status == "success") {
-                        $formParents.find("a").removeClass("active-reply");
-                        $formParents.find(replyWrapper).remove();
-                        return;
-                    }
-
-                    // reload the current form
-                    $($form).replaceWith(data.form);
-                    initReplyForms();
+                    closeReplyForms($form);
+                    showActionDenied();
                 }
             }, 'post', $(this).serialize(), false);
         });
@@ -134,13 +190,69 @@ function Comment(options)
     {
         $(globalCommentsWrapper).find(paginatorWrapper).off().bind("click", function(e) {
             e.preventDefault();
-            var lastCommentId = $(globalCommentsWrapper).find(".media:last").attr("comment-id");
             var paginatorUrl = baseUrl + "&action=get_comments&last_comment=" + lastCommentId;
 
             // get next comments
             ajaxQuery($(commentsListWrapper), paginatorUrl, function(data) {
-                alert(data);
-            }, 'get', '', false);
+                if (data) {
+                    data = $.parseJSON(data);
+
+                    // append comments
+                    if (typeof data.comments != "undefined" && data.comments) {
+                        addComments(data.comments);
+                    }
+
+                    // remove the pagination wrapper we have reached the end
+                    if (typeof data.comments == "undefined" || !data.comments || !data.show_paginator) {
+                        $(paginatorWrapper).remove();
+                    }
+                }
+                else {
+                    $(paginatorWrapper).remove();
+                    showActionDenied();
+                }
+            }, 'post', '', false);
+        });
+    }
+
+    /**
+     * Add comments
+     *
+     * @param object comments
+     * @param boolean isOwnReply
+     * @return void
+     */
+    var addComments = function(comments, isOwnReply)
+    {
+        $commentsList = $(commentsListWrapper);
+
+        $.each(comments, function(key, value) {
+            // remember the last added comment
+            lastCommentId = value.id;
+
+            // add the comment
+            if (typeof isOwnReply != "undefined" && isOwnReply) {
+                value.parent_id
+                    ? $commentsList.find(".media[comment-id='" + value.parent_id + "'] " + repliesWrapper + ":first").prepend(value.comment)
+                    : $commentsList.prepend(value.comment);
+            }
+            else {
+                value.parent_id
+                    ? $commentsList.find(".media[comment-id='" + value.parent_id + "'] " + repliesWrapper + ":first").append(value.comment)
+                    : $commentsList.append(value.comment);
+            }
+        });
+
+        initReplyLinks();
+    }
+
+    /**
+     * Init access denied
+     */
+    var initAccessDenied = function()
+    {
+        $(globalCommentsWrapper + " > " + actionDeniedWrapper).find(".close").bind("click", function(){
+            $(this).parent().hide();
         });
     }
 
@@ -152,5 +264,9 @@ function Comment(options)
         initReplyLinks();
         initReplyForms();
         initPaginator();
+        initAccessDenied();
+
+        // get last comment id
+        lastCommentId = $(globalCommentsWrapper).find(".media:last").attr("comment-id");
     }
 }

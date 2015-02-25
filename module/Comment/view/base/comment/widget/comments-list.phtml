@@ -1,17 +1,31 @@
 <div id="global-comments-wrapper">
+
+    <div id="comments-action-denied" class="alert alert-danger">
+        <button type="button" class="close" >&times;</button>
+        <?php echo $this->translate('Access Denied') ?>
+    </div>
+
     <?php if ($this->comment_form): ?>
-        <div class="comment-reply-wrapper">
+        <div class="comment-reply-form-wrapper">
             <?php echo $this->comment_form ?>
         </div>
     <?php endif ?>
+
     <div id="comments-list-wrapper">
         <?php if ($this->comments): ?>
             <?php echo $this->comments ?>
         <?php endif ?>
     </div>
-    <div id="comments-paginator-wrapper">
-        <a href="#">Load more</a>
-    </div>
+
+    <?php if ($this->show_paginator): ?>
+        <div id="comments-paginator-wrapper">
+            <hr />
+            <a class="btn btn-default btn-sm btn-block" href="#">
+                <?php echo $this->translate('Load more') ?>
+            </a>
+        </div>
+    <?php endif ?>
+
 </div>
 <script type="text/javascript">
     $("document").ready(function(){
@@ -24,26 +38,30 @@
     })
 </script>
 <style>
-    div#global-comments-wrapper div.comment-reply-wrapper {
+    div#global-comments-wrapper div#comments-action-denied {
+        display: none;
+    }
+
+    div#global-comments-wrapper div.comment-reply-form-wrapper {
         background-color: #F5F5F5;
         padding:15px;
         margin-bottom:15px;
         position: relative;
     }
 
-    div#global-comments-wrapper div.comment-reply-wrapper .form-control {
+    div#global-comments-wrapper div.comment-reply-form-wrapper .form-control {
         font-weight:normal;
     }
 
-    div#global-comments-wrapper div.comment-reply-wrapper hr {
+    div#global-comments-wrapper div.comment-reply-form-wrapper hr {
         margin-bottom:10px;
     }
 
-    div#global-comments-wrapper div.comment-reply-wrapper span {
+    div#global-comments-wrapper div.comment-reply-form-wrapper span {
         display: block;
     }
 
-    div#global-comments-wrapper div.comment-reply-wrapper img {
+    div#global-comments-wrapper div.comment-reply-form-wrapper img {
         margin-bottom:10px;
         margin-top:10px;
     }
