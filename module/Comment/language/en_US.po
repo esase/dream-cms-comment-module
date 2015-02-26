@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Dream CMS \"comment\" module\n"
 "POT-Creation-Date: 2013-07-19 11:59+0600\n"
-"PO-Revision-Date: 2015-02-25 12:45+0600\n"
+"PO-Revision-Date: 2015-02-26 12:17+0600\n"
 "Last-Translator: AlexE <alexermashev@gmail.com>\n"
 "Language-Team: \n"
 "Language: English\n"
@@ -14,6 +14,21 @@ msgstr ""
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Comment added message"
+msgstr "Comment added message"
+
+msgid "A comment add notification"
+msgstr "A comment add notification"
+
+msgid "Comment added title"
+msgstr "Comment added title"
+
+msgid "Send notifications about new comments"
+msgstr "Send notifications about new comments"
+
+msgid "Comments auto approve"
+msgstr "Comments auto approve"
 
 msgid "Reply"
 msgstr "Reply"
@@ -41,6 +56,15 @@ msgstr "Module allows to publish comments on the site"
 
 msgid "Comment"
 msgstr "Comment"
+
+msgid "Event - Adding comments"
+msgstr "Adding comments"
+
+msgid "Event - Comment added by guest"
+msgstr "Guest added the comment with id - \"%d\""
+
+msgid "Event - Comment added by user"
+msgstr "\"%s\" added the comment with id - \"%d\""
 
 msgid "ACL - Viewing comments"
 msgstr "Viewing comments"

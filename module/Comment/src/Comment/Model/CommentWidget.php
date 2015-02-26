@@ -12,10 +12,9 @@ class CommentWidget extends CommentBase
      * @param integer $pageId
      * @param string $pageSlug
      * @param integer $lastRightKey
-     * @param array $ownReplies
      * @return integer
      */
-    public function getCommentsCount($pageId, $pageSlug = null, $lastRightKey = null, $ownReplies = null)
+    public function getCommentsCount($pageId, $pageSlug = null, $lastRightKey = null)
     {
         $select = $this->select();
         $select->from('comment_list')
@@ -30,11 +29,6 @@ class CommentWidget extends CommentBase
 
         if ($lastRightKey) {
             $select->where->lessThan($this->getCommentModel()->getRightKey(), $lastRightKey);
-        }
-
-        // skip own replies
-        if ($ownReplies && is_array($ownReplies)) {
-            $select->where->notIn('id', $ownReplies);
         }
 
         $statement = $this->prepareStatementForSqlObject($select);
@@ -52,10 +46,9 @@ class CommentWidget extends CommentBase
      * @param integer $limit
      * @param boolean $getTree
      * @param integer $lastRightKey
-     * @param array $ownReplies
      * @return array
      */
-    public function getComments($pageId, $pageSlug = null, $limit, $getTree = true, $lastRightKey = null, $ownReplies = null)
+    public function getComments($pageId, $pageSlug = null, $limit, $getTree = true, $lastRightKey = null)
     {
         $select = $this->select();
         $select->from('comment_list')
@@ -74,11 +67,6 @@ class CommentWidget extends CommentBase
 
         if ($lastRightKey) {
             $select->where->lessThan($this->getCommentModel()->getRightKey(), $lastRightKey);
-        }
-
-        // skip own replies
-        if ($ownReplies && is_array($ownReplies)) {
-            $select->where->notIn('id', $ownReplies);
         }
 
         $statement = $this->prepareStatementForSqlObject($select);

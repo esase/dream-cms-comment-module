@@ -49,12 +49,6 @@ function Comment(options)
     var paginatorWrapper = "#comments-paginator-wrapper";
 
     /**
-     * Own replies
-     * @var object
-     */
-    //var ownReplies = {};
-
-    /**
      * Last comment id
      * @var integer
      */
@@ -81,7 +75,7 @@ function Comment(options)
 
         // remove all erros and unset entered values
         $replyForm.find("ul").remove();
-        $replyForm.find(":input:not(input[type=submit],input[name='csrf'],input[name='captcha[id]'])").val("");
+        $replyForm.find(".primary-data").val("");
         $replyForm.find(".alert").remove();
 
         return $replyForm;
@@ -135,13 +129,13 @@ function Comment(options)
         $(globalCommentsWrapper).find("form").off().on("submit", function(e) {
             e.preventDefault();
             var $form = this;
-            var formUrl = baseUrl + "&action=add_comment";
+            var formUrl = baseUrl + "&widget_action=add_comment";
 
             // collect extra params
             var replyId = $(this).parents(".media:first").attr("comment-id");
 
             if (typeof replyId != "undefined") {
-                formUrl += "&reply_id=" + replyId;
+                formUrl += "&widget_reply_id=" + replyId;
             }
 
             // send a form data
@@ -170,8 +164,16 @@ function Comment(options)
                             return;
                         }
 
+                        // get updated form content
+                        var $formContent = $(data.form);
+
+                        // clear form values
+                        if (data.status == "success") {
+                            $formContent.find(".primary-data").val("");
+                        }
+
                         // reload the current form
-                        $($form).replaceWith(data.form);
+                        $($form).replaceWith($formContent);
                         initReplyForms();
                     }
                 }
@@ -190,7 +192,7 @@ function Comment(options)
     {
         $(globalCommentsWrapper).find(paginatorWrapper).off().bind("click", function(e) {
             e.preventDefault();
-            var paginatorUrl = baseUrl + "&action=get_comments&last_comment=" + lastCommentId;
+            var paginatorUrl = baseUrl + "&widget_action=get_comments&widget_last_comment=" + lastCommentId;
 
             // get next comments
             ajaxQuery($(commentsListWrapper), paginatorUrl, function(data) {
@@ -211,7 +213,7 @@ function Comment(options)
                     $(paginatorWrapper).remove();
                     showActionDenied();
                 }
-            }, 'post', '', false);
+            }, 'get', '', false);
         });
     }
 
@@ -227,16 +229,22 @@ function Comment(options)
         $commentsList = $(commentsListWrapper);
 
         $.each(comments, function(key, value) {
-            // remember the last added comment
-            lastCommentId = value.id;
-
             // add the comment
             if (typeof isOwnReply != "undefined" && isOwnReply) {
-                value.parent_id
-                    ? $commentsList.find(".media[comment-id='" + value.parent_id + "'] " + repliesWrapper + ":first").prepend(value.comment)
-                    : $commentsList.prepend(value.comment);
+                if (value.parent_id) {
+                    $commentsList.find(".media[comment-id='" + value.parent_id + "'] " + repliesWrapper + ":first").prepend(value.comment);
+
+                    // remember the last added comment
+                    lastCommentId = value.id;
+                }
+                else {
+                    $commentsList.prepend(value.comment);
+                }
             }
             else {
+                // remember the last added comment
+                lastCommentId = value.id;
+
                 value.parent_id
                     ? $commentsList.find(".media[comment-id='" + value.parent_id + "'] " + repliesWrapper + ":first").append(value.comment)
                     : $commentsList.append(value.comment);
@@ -266,7 +274,10 @@ function Comment(options)
         initPaginator();
         initAccessDenied();
 
-        // get last comment id
-        lastCommentId = $(globalCommentsWrapper).find(".media:last").attr("comment-id");
+        // get a last comment id
+        $lastComment = $(globalCommentsWrapper).find(".media:last");
+        lastCommentId = $lastComment.length
+            ? $lastComment.attr("comment-id")
+            : '';
     }
 }

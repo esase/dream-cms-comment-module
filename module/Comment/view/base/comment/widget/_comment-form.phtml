@@ -14,13 +14,17 @@
         <?php endif ?>
     <?php endif ?>
 
-    <?php echo $this->formRow($this->comment_form->get('comment')->removeAttribute('id')->setLabel('') ) ?>
+    <?php echo $this->formRow($this->comment_form->get('comment')->setLabel('')->removeAttribute('id')->setAttribute('class', 'form-control primary-data')) ?>
+
+    <?php if ($this->guest_mode): ?>
+        <?php echo $this->formRow($this->comment_form->get('name')->removeAttribute('id')) ?>
+        <?php echo $this->formRow($this->comment_form->get('email')->removeAttribute('id')) ?>
+    <?php endif ?>
 
     <?php if ($this->enable_captcha): ?>
         <?php echo $this->formRow($this->comment_form->get('captcha')->removeAttribute('id')) ?>
     <?php endif ?>
 
     <?php echo $this->formRow($this->comment_form->get('csrf')->removeAttribute('id')) ?>
-    <hr />
     <?php echo $this->formSubmit($this->comment_form->get('submit')->removeAttribute('id')) ?>
 <?php echo $this->form()->closeTag() ?>

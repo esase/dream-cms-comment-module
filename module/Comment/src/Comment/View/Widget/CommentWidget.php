@@ -49,10 +49,11 @@ class CommentWidget extends PageAbstractWidget
      */
     protected function getCommentForm($validate = false)
     {
-        //return false;
         if (AclService::checkPermission('comment_add', false)) {
             // get comment form settings
-            $captchaEnabled = (int) $this->getWidgetSetting('comment_form_captcha');
+            $captchaEnabled = (int) $this->
+                    getWidgetSetting('comment_form_captcha') && UserIdentityService::isGuest();
+
             $commentStatus = '';
             $commentInfo   = '';
 
@@ -60,7 +61,8 @@ class CommentWidget extends PageAbstractWidget
             $commentForm = $this->getServiceLocator()
                 ->get('Application\Form\FormManager')
                 ->getInstance('Comment\Form\Comment')
-                ->enableCaptcha($captchaEnabled);
+                ->enableCaptcha($captchaEnabled)
+                ->setGuestMode(UserIdentityService::isGuest());
 
             // validate the form
             if ($validate) {
@@ -69,29 +71,34 @@ class CommentWidget extends PageAbstractWidget
 
                 // add a new comment
                 if ($commentForm->getForm()->isValid()) {
-                    $replyId = $this->getRequest()->getQuery('reply_id', null);
+                    $replyId  = $this->getRequest()->getQuery('widget_reply_id', null);
+                    $userRole = UserIdentityService::getCurrentUserIdentity()['role'];
 
-                    // get the comment status
-                    $commentActive = (int) $this->getSetting('comments_auto_approve')
-                            || UserIdentityService::getCurrentUserIdentity()['role'] ==  AclBaseModel::DEFAULT_ROLE_ADMIN
-                                ? CommentNestedSet::COMMENT_STATUS_ACTIVE
-                                : CommentNestedSet::COMMENT_STATUS_NOT_ACTIVE;
+                    // get current page url
+                    $pageUrl = $this->getView()->url('page', ['page_name' =>
+                            $this->getView()->pageUrl(PageService::getCurrentPage()['slug']), 'slug' => $this->getPageSlug()], ['force_canonical' => true]);
 
-                    $userId = !UserIdentityService::isGuest()
-                        ? UserIdentityService::getCurrentUserIdentity()['user_id']
-                        : null;
- 
+                    $formData = $commentForm->getForm()->getData();
+
+                    // collect basic data
+                    $basicData = [
+                        'active' => (int) $this->getSetting('comments_auto_approve') || $userRole ==  AclBaseModel::DEFAULT_ROLE_ADMIN
+                            ? CommentNestedSet::COMMENT_STATUS_ACTIVE
+                            : CommentNestedSet::COMMENT_STATUS_NOT_ACTIVE,
+                        'comment' => $formData['comment'],
+                        'name' => !empty($formData['name']) ? $formData['name'] : null,
+                        'email' => !empty($formData['email']) ? $formData['email'] : null,
+                        'user_id' => !UserIdentityService::isGuest()
+                            ? UserIdentityService::getCurrentUserIdentity()['user_id']
+                            : null
+                    ];
+
                     $commentStatus = 'error';
-                    $comment   = $commentForm->getForm()->getData()['comment'];
-                    $commentId = $this->getModel()->getCommentModel()->
-                            addComment($commentActive, $comment, $this->pageId, $this->getPageSlug(), $userId, $replyId);
+                    $commentInfo = $this->getModel()->
+                            getCommentModel()->addComment($pageUrl, $basicData, $this->pageId, $this->getPageSlug(), $replyId);
 
                     // return a status
-                    if (is_numeric($commentId)) {
-                        // get the comment info
-                        $commentInfo = $this->getModel()->
-                                getCommentModel()->getCommentInfo($commentId, $this->pageId, $this->getPageSlug());
-
+                    if (is_array($commentInfo)) {
                         $commentStatus = $commentInfo['active'] == CommentNestedSet::COMMENT_STATUS_ACTIVE
                             ? 'success'
                             : 'disapproved';
@@ -108,6 +115,7 @@ class CommentWidget extends PageAbstractWidget
                 'form' => $this->getView()->partial('comment/widget/_comment-form', [
                     'status' => $commentStatus,
                     'enable_captcha' => $captchaEnabled,
+                    'guest_mode' => UserIdentityService::isGuest(),
                     'comment_form' => $commentForm->getForm()
                 ])
             ];
@@ -123,29 +131,35 @@ class CommentWidget extends PageAbstractWidget
      */
     public function getContent() 
     {
-        // TODO: 1. Get a comment content after adding. 1.1 Show empty block 2. Test with disapprove. 3. Add System event. 4. Test ACL AGAIN!
-        //return false;
+        // TODO:
+        // 1.Show empty block
+        // 2. Test with disapprove.+
+        // 4. Test ACL AGAIN!
+        // 5. Add notification about new messages.
+        // 6. TEST comments on different pages +
+        // 7. Store ip
+        // 8 . Store email
+
         if (AclService::checkPermission('comment_view', false)) {
             // process actions
             if (false !== ($action = $this->
-                    getRequest()->getQuery('action', false)) && $this->getRequest()->isXmlHttpRequest()) {
+                    getRequest()->getQuery('widget_action', false)) && $this->getRequest()->isXmlHttpRequest()) {
 
                 switch ($action) {
                     case 'get_comments' :
                         // get the comment info
-                        $ownReplies = $this->getRequest()->getPost('own_replies', null);
-                        $lastCommentId = $this->getRequest()->getQuery('last_comment', -1);
+                        $lastCommentId = $this->getRequest()->getQuery('widget_last_comment', -1);
                         $commentInfo = $this->getModel()->
                                 getCommentModel()->getCommentInfo($lastCommentId, $this->pageId, $this->getPageSlug());
 
                         if ($commentInfo) {
                             $leftComments = $this->getModel()->getCommentsCount($this->pageId, $this->
-                                    getPageSlug(), $commentInfo[$this->getModel()->getCommentModel()->getRightKey()], $ownReplies);
+                                    getPageSlug(), $commentInfo[$this->getModel()->getCommentModel()->getRightKey()]);
 
                             return $this->getView()->json([
                                 'show_paginator' => $leftComments - (int) $this->getWidgetSetting('comment_per_page') > 0,
                                 'comments' => $this->getCommentsList(false,
-                                        $commentInfo[$this->getModel()->getCommentModel()->getRightKey()], true, $ownReplies)
+                                        $commentInfo[$this->getModel()->getCommentModel()->getRightKey()], true)
                             ]);
                         }
                         break;

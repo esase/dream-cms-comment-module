@@ -20,6 +20,11 @@ INSERT INTO `acl_resource_connection` (`role`, `resource`) VALUES
 (3, @addCommentResourceId),
 (2, @addCommentResourceId);
 
+-- application events
+
+INSERT INTO `application_event` (`name`, `module`, `description`) VALUES
+('comment_add', @moduleId, 'Event - Adding comments');
+
 -- application settings
 
 INSERT INTO `application_setting_category` (`name`, `module`) VALUES
@@ -32,6 +37,33 @@ SET @settingId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
 (@settingId, '1', NULL);
+
+INSERT INTO `application_setting_category` (`name`, `module`) VALUES
+('Email notifications', @moduleId);
+SET @settingsCategoryId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
+('comment_added_send', 'Send notifications about new comments', NULL, 'checkbox', NULL, 1, @settingsCategoryId, @moduleId, NULL, NULL, NULL, NULL);
+SET @settingId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
+(@settingId, '1', NULL);
+
+INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
+('comment_added_title', 'Comment added title', 'A comment add notification', 'notification_title', 1, 2, @settingsCategoryId, @moduleId, 1, NULL, NULL, NULL);
+SET @settingId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
+(@settingId, 'A new comment on the page', NULL),
+(@settingId, 'Новый комментарий на странице', 'ru');
+
+INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
+('comment_added_message', 'Comment added message', NULL, 'notification_message', 1, 3, @settingsCategoryId, @moduleId, 1, NULL, NULL, NULL);
+SET @settingId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
+(@settingId, '<p><b>__PosterName__ (__PosterEmail__):</b></p><p><a href="__CommentUrl__#comment-__CommentId__">__Comment__</a></p><p>__Date__</p>', NULL),
+(@settingId, '<p><b>__PosterName__ (__PosterEmail__):</b></p><p><a href="__CommentUrl__#comment-__CommentId__">__Comment__</a></p><p>__Date__</p>', 'ru');
 
 -- system pages and widgets
 
@@ -58,6 +90,9 @@ INSERT INTO `page_widget_setting_default_value` (`setting_id`, `value`, `languag
 CREATE TABLE `comment_list` (
     `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `comment` TEXT NOT NULL,
+    `ip` INT(10) UNSIGNED NOT NULL,
+    `name` VARCHAR(50) DEFAULT NULL,
+    `email` VARCHAR(50) DEFAULT NULL,
     `active` TINYINT(1) UNSIGNED NULL DEFAULT '1',
     `hidden` TINYINT(1) UNSIGNED NULL DEFAULT '1',
     `page_id` SMALLINT(5) UNSIGNED NOT NULL,
