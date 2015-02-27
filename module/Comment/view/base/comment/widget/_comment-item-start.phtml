@@ -1,4 +1,4 @@
-<div class="media" comment-id="<?php echo (int) $this->id ?>">
+<div class="media <?php if (!$this->approved): ?>disapproved<?php endif ?>" comment-id="<?php echo (int) $this->id ?>">
     <a name="comment-<?php echo (int) $this->id ?>"></a>
     <div class="media-left">
         <a href="#">
@@ -7,9 +7,15 @@
     </div>
     <div class="media-body">
         <div class="owner">
-            <p><a href="#">eSASe</a> 14.04.84 </p>
+            <a href="#">eSASe</a> 14.04.84
         </div>
-        <div class="comment" >
+        <div class="comment">
+            <div class="comment-actions-wrapper">
+                <a class="approve-comment" href="#"><?php echo $this->translate('Approve') ?></a>
+                <!-- <a href="#">Disapprove</a>
+                <a href="#">Edit</a>
+                <a href="#">Delete</a> -->
+            </div>
             <p><?php echo  $this->escapeHtml($this->comment) ?></p>
         </div>
         <div class="reply-link-wrapper">

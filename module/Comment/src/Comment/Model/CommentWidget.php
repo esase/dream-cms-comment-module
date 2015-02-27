@@ -9,12 +9,13 @@ class CommentWidget extends CommentBase
     /**
      * Get comments count
      *
+     * @param boolean $allowApprove
      * @param integer $pageId
      * @param string $pageSlug
      * @param integer $lastRightKey
      * @return integer
      */
-    public function getCommentsCount($pageId, $pageSlug = null, $lastRightKey = null)
+    public function getCommentsCount($allowApprove, $pageId, $pageSlug = null, $lastRightKey = null)
     {
         $select = $this->select();
         $select->from('comment_list')
@@ -23,9 +24,14 @@ class CommentWidget extends CommentBase
             ])
             ->where([
                 'page_id' => $pageId,
-                'slug' => $pageSlug,
+                'slug' => $pageSlug
+            ]);
+
+        if (!$allowApprove) {
+            $select->where([
                 'hidden' => CommentNestedSet::COMMENT_STATUS_NOT_HIDDEN
             ]);
+        }
 
         if ($lastRightKey) {
             $select->where->lessThan($this->getCommentModel()->getRightKey(), $lastRightKey);
@@ -41,6 +47,7 @@ class CommentWidget extends CommentBase
     /**
      * Get comments
      *
+     * @param boolean $allowApprove
      * @param integer $pageId
      * @param string $pageSlug
      * @param integer $limit
@@ -48,22 +55,28 @@ class CommentWidget extends CommentBase
      * @param integer $lastRightKey
      * @return array
      */
-    public function getComments($pageId, $pageSlug = null, $limit, $getTree = true, $lastRightKey = null)
+    public function getComments($allowApprove, $pageId, $pageSlug = null, $limit, $getTree = true, $lastRightKey = null)
     {
         $select = $this->select();
         $select->from('comment_list')
             ->columns([
                 'id',
                 'comment',
-                'parent_id'
+                'parent_id',
+                'active'
             ])
             ->where([
                 'page_id' => $pageId,
-                'slug' => $pageSlug,
-                'hidden' => CommentNestedSet::COMMENT_STATUS_NOT_HIDDEN
+                'slug' => $pageSlug
             ])
             ->limit($limit)
             ->order($this->getCommentModel()->getRightKey() . ' desc');
+
+        if (!$allowApprove) {
+            $select->where([
+                'hidden' => CommentNestedSet::COMMENT_STATUS_NOT_HIDDEN
+            ]);
+        }
 
         if ($lastRightKey) {
             $select->where->lessThan($this->getCommentModel()->getRightKey(), $lastRightKey);

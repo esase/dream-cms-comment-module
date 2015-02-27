@@ -13,6 +13,10 @@ INSERT INTO `acl_resource_connection` (`role`, `resource`) VALUES
 (2, @viewCommentResourceId);
 
 INSERT INTO `acl_resource` (`resource`, `description`, `module`) VALUES
+('comment_approve', 'ACL - Approving comments', @moduleId),
+('comment_dsapprove', 'ACL - Disapproving comments', @moduleId);
+
+INSERT INTO `acl_resource` (`resource`, `description`, `module`) VALUES
 ('comment_add', 'ACL - Adding comments', @moduleId);
 SET @addCommentResourceId = (SELECT LAST_INSERT_ID());
 
@@ -23,7 +27,8 @@ INSERT INTO `acl_resource_connection` (`role`, `resource`) VALUES
 -- application events
 
 INSERT INTO `application_event` (`name`, `module`, `description`) VALUES
-('comment_add', @moduleId, 'Event - Adding comments');
+('comment_add', @moduleId, 'Event - Adding comments'),
+('comment_approve', @moduleId, 'Event - Approving comments');
 
 -- application settings
 
@@ -84,6 +89,19 @@ SET @widgetSettingId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `page_widget_setting_default_value` (`setting_id`, `value`, `language`) VALUES
 (@widgetSettingId, '20', NULL);
+
+INSERT INTO `page_system_widget_hidden` (`page_id`, `widget_id`) VALUES
+(2,  @widgetId),
+(3,  @widgetId),
+(4,  @widgetId),
+(5,  @widgetId),
+(6,  @widgetId),
+(7,  @widgetId),
+(8,  @widgetId),
+(9,  @widgetId),
+(11, @widgetId),
+(12, @widgetId),
+(13, @widgetId);
 
 -- module tables
 

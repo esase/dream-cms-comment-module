@@ -2,6 +2,8 @@
 namespace Comment\Model;
 
 use Application\Model\ApplicationAbstractBase;
+use Application\Utility\ApplicationErrorLogger;
+use Exception;
 
 class CommentBase extends ApplicationAbstractBase
 {

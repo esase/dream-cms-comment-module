@@ -2,9 +2,11 @@
 namespace Comment\Model;
 
 use Comment\Event\CommentEvent;
+use Application\Utility\ApplicationErrorLogger;
 use Application\Model\ApplicationAbstractNestedSet;
 use Zend\Db\Sql\Select;
 use Zend\Http\PhpEnvironment\RemoteAddress;
+use Exception;
 
 class CommentNestedSet extends ApplicationAbstractNestedSet 
 {
@@ -27,6 +29,88 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
      * Comment status not hidden
      */
     const COMMENT_STATUS_NOT_HIDDEN = null;
+
+    /**
+     * Approve comment
+     *
+     * @param array $commentInfo
+     *  integer id
+     *  integer page_id
+     *  integer left_key
+     *  integer right_key
+     *  string slug
+     * @return boolean|string
+     */
+    public function approveComment(array $commentInfo)
+    {
+        try {
+            $this->tableGateway->getAdapter()->getDriver()->getConnection()->beginTransaction();
+
+            $this->tableGateway->update([
+                'active' => self::COMMENT_STATUS_ACTIVE,
+                'hidden' => self::COMMENT_STATUS_NOT_HIDDEN
+            ], [$this->nodeId => $commentInfo['id']]);
+
+            $filter = [
+                'page_id' => $commentInfo['page_id'],
+                'slug' => $commentInfo['slug']
+            ];
+
+            // skip the hidden flag for all siblings comments
+            $result = $this->updateSiblingsNodes([
+                'hidden' => self::COMMENT_STATUS_NOT_HIDDEN
+            ], $commentInfo[$this->left], $commentInfo[$this->right], null, $filter, false);
+
+            if (true !== $result) {
+                $this->tableGateway->getAdapter()->getDriver()->getConnection()->rollback();
+                return $result;
+            }
+
+            // hide not active siblings
+            while (true) {
+                $siblingFilter = array_merge($filter, [
+                    'active' => self::COMMENT_STATUS_NOT_ACTIVE,
+                    'hidden' => self::COMMENT_STATUS_NOT_HIDDEN]
+                );
+
+                $sibling = $this->getSiblingsNodes($commentInfo[$this->
+                        left], $commentInfo[$this->right], null, $siblingFilter , null, 1);
+
+                if (false !== $sibling) {
+                    $sibling = array_shift($sibling);
+
+                    $this->tableGateway->update([
+                        'hidden' => self::COMMENT_STATUS_HIDDEN
+                    ], [$this->nodeId => $sibling['id']]);
+    
+                    $result = $this->updateSiblingsNodes([
+                        'hidden' => self::COMMENT_STATUS_HIDDEN
+                    ], $sibling[$this->left], $sibling[$this->right], null, $filter, false);
+    
+                    if (true !== $result) {
+                        $this->tableGateway->getAdapter()->getDriver()->getConnection()->rollback();
+                        return $result;
+                    }
+
+                    continue;    
+                }
+
+                break;
+            }
+
+            $this->tableGateway->getAdapter()->getDriver()->getConnection()->commit();
+        }
+        catch (Exception $e) {
+            $this->tableGateway->getAdapter()->getDriver()->getConnection()->rollback();
+
+            ApplicationErrorLogger::log($e);
+            return $e->getMessage();
+        }
+
+        // fire the approve comment event
+        CommentEvent::fireApproveCommentEvent($commentInfo['id']);
+        return true;
+    }
 
     /**
      * Get comment info
@@ -81,10 +165,7 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
         }
 
         // the reply comment don't exsist or not active
-        if ($replyId && (!$replyComment
-                || $replyComment['active'] == CommentNestedSet::COMMENT_STATUS_NOT_ACTIVE
-                || $replyComment['hidden'] == CommentNestedSet::COMMENT_STATUS_HIDDEN)) {
-
+        if ($replyId && !$replyComment) {
             return;
         }
 
@@ -96,8 +177,11 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
         $remote = new RemoteAddress;
         $remote->setUseProxy(true);
 
+        $commentHidden = $basicData['active'] == self::COMMENT_STATUS_NOT_ACTIVE
+                || ($replyComment && $replyComment['hidden'] == CommentNestedSet::COMMENT_STATUS_HIDDEN);
+
         $data = array_merge($basicData, [
-            'hidden' => $basicData['active'] == self::COMMENT_STATUS_NOT_ACTIVE
+            'hidden' => $commentHidden
                 ? self::COMMENT_STATUS_HIDDEN
                 : self::COMMENT_STATUS_NOT_HIDDEN,
             'page_id' => $pageId,

@@ -28,14 +28,13 @@
 
 </div>
 <script type="text/javascript">
-    $("document").ready(function(){
-        var comment = new Comment({
-            "base_url" : "<?php echo $this->escapeJs($this->base_url) ?>"
-        });
+    var comment = new Comment();
 
-        // init comments
-        comment.init();
-    })
+    // init comments
+    comment.setBaseUrl("<?php echo $this->escapeJs($this->base_url) ?>")
+        .allowAddComments(<?php echo $this->aclCheckPermission("comment_add") ? 'true' : 'false' ?>)
+        .allowApproveComments(<?php echo $this->aclCheckPermission("comment_approve") ? 'true' : 'false' ?>)
+        .init();
 </script>
 <style>
     div#global-comments-wrapper div#comments-action-denied {
@@ -53,9 +52,6 @@
         font-weight:normal;
     }
 
-    div#global-comments-wrapper div.comment-reply-form-wrapper hr {
-        margin-bottom:10px;
-    }
 
     div#global-comments-wrapper div.comment-reply-form-wrapper span {
         display: block;
@@ -71,7 +67,26 @@
         position: relative;
     }
 
+    div#global-comments-wrapper #comments-list-wrapper .media {
+        color:#333;  
+    }
+
+    div#global-comments-wrapper #comments-list-wrapper .disapproved {
+        color:#c0c0c0;  
+    }
+
     div#global-comments-wrapper #comments-list-wrapper .media-body{
         width: 100%;
+    }
+
+    div#global-comments-wrapper #comments-list-wrapper .media-body .comment-actions-wrapper {
+        font-size: 12px;
+        margin-bottom:10px;
+        margin-top:5px;color:#c0c0c0;
+    }
+    
+    div#global-comments-wrapper #comments-list-wrapper .media-body .comment-actions-wrapper a {
+        margin-right:5px;
+        display: none;
     }
 </style>

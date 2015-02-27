@@ -16,6 +16,32 @@ class CommentEvent extends ApplicationAbstractEvent
     const ADD_COMMENT = 'comment_add';
 
     /**
+     * Approve comment event
+     */
+    const APPROVE_COMMENT = 'comment_approve';
+
+    /**
+     * Fire approve comment event
+     *
+     * @param $commentId
+     * @return void
+     */
+    public static function fireApproveCommentEvent($commentId)
+    {
+        // event's description
+        $eventDesc = UserIdentityService::isGuest()
+            ? 'Event - Comment approved by guest'
+            : 'Event - Comment approved by user';
+
+        $eventDescParams = UserIdentityService::isGuest()
+            ? [$commentId]
+            : [UserIdentityService::getCurrentUserIdentity()['nick_name'], $commentId];
+
+        self::fireEvent(self::APPROVE_COMMENT, 
+                $commentId, UserIdentityService::getCurrentUserIdentity()['user_id'], $eventDesc, $eventDescParams);
+    }
+
+    /**
      * Fire add comment event
      *
      * @param string $pageUrl

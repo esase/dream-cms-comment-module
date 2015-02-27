@@ -42,12 +42,40 @@ class CommentWidget extends PageAbstractWidget
     }
 
     /**
+     * Approve comment
+     *
+     * @apram integer $commentId
+     * @return boolean
+     */
+    protected function approveComment($commentId)
+    {
+        if (AclService::checkPermission('comment_approve', false)) {
+            if (null != ($commentInfo = $this->getModel()->
+                    getCommentModel()->getCommentInfo($commentId, $this->pageId, $this->getPageSlug()))) {
+
+                    
+                // approve comment
+                if ($commentInfo['active'] == CommentNestedSet::COMMENT_STATUS_NOT_ACTIVE) {
+                    if (true === ($result = $this->getModel()->getCommentModel()->approveComment($commentInfo))) {
+                        // increase ACL track
+                        AclService::checkPermission('comment_approve');
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Get comment form
      *
+     * @param boolean $allowApprove
      * @param boolean $validate
      * @return array|boolean
      */
-    protected function getCommentForm($validate = false)
+    protected function getCommentForm($allowApprove, $validate = false)
     {
         if (AclService::checkPermission('comment_add', false)) {
             // get comment form settings
@@ -80,11 +108,13 @@ class CommentWidget extends PageAbstractWidget
 
                     $formData = $commentForm->getForm()->getData();
 
+                    // get comment's status
+                    $commentActive = (int) $this->getSetting('comments_auto_approve')
+                            || $userRole ==  AclBaseModel::DEFAULT_ROLE_ADMIN || $allowApprove;
+
                     // collect basic data
                     $basicData = [
-                        'active' => (int) $this->getSetting('comments_auto_approve') || $userRole ==  AclBaseModel::DEFAULT_ROLE_ADMIN
-                            ? CommentNestedSet::COMMENT_STATUS_ACTIVE
-                            : CommentNestedSet::COMMENT_STATUS_NOT_ACTIVE,
+                        'active' => $commentActive ? CommentNestedSet::COMMENT_STATUS_ACTIVE : CommentNestedSet::COMMENT_STATUS_NOT_ACTIVE,
                         'comment' => $formData['comment'],
                         'name' => !empty($formData['name']) ? $formData['name'] : null,
                         'email' => !empty($formData['email']) ? $formData['email'] : null,
@@ -130,17 +160,22 @@ class CommentWidget extends PageAbstractWidget
      * @return string|boolean
      */
     public function getContent() 
-    {
+    {//return false;
         // TODO:
         // 1.Show empty block
         // 2. Test with disapprove.+
         // 4. Test ACL AGAIN!
-        // 5. Add notification about new messages.
+        // 5. Add notification about new messages.+
         // 6. TEST comments on different pages +
-        // 7. Store ip
-        // 8 . Store email
+        // 7. Store ip +
+        // 8 . Store email+
+        // 9. Edit comments ????
+        //10. DON't show access denied for absent comments (approve function)!
 
         if (AclService::checkPermission('comment_view', false)) {
+            // is approve allowing
+            $allowApprove = AclService::checkPermission('comment_approve', false);
+
             // process actions
             if (false !== ($action = $this->
                     getRequest()->getQuery('widget_action', false)) && $this->getRequest()->isXmlHttpRequest()) {
@@ -153,12 +188,12 @@ class CommentWidget extends PageAbstractWidget
                                 getCommentModel()->getCommentInfo($lastCommentId, $this->pageId, $this->getPageSlug());
 
                         if ($commentInfo) {
-                            $leftComments = $this->getModel()->getCommentsCount($this->pageId, $this->
-                                    getPageSlug(), $commentInfo[$this->getModel()->getCommentModel()->getRightKey()]);
+                            $leftComments = $this->getModel()->getCommentsCount($allowApprove, $this->
+                                pageId, $this->getPageSlug(), $commentInfo[$this->getModel()->getCommentModel()->getRightKey()]);
 
                             return $this->getView()->json([
                                 'show_paginator' => $leftComments - (int) $this->getWidgetSetting('comment_per_page') > 0,
-                                'comments' => $this->getCommentsList(false,
+                                'comments' => $this->getCommentsList($allowApprove, false,
                                         $commentInfo[$this->getModel()->getCommentModel()->getRightKey()], true)
                             ]);
                         }
@@ -167,21 +202,28 @@ class CommentWidget extends PageAbstractWidget
                     case 'add_comment'  :
                         // validate and add a new comment
                         if ($this->getRequest()->isPost()) {
-                            return $this->getView()->json($this->getCommentForm(true));
+                            return $this->getView()->json($this->getCommentForm($allowApprove, true));
+                        }
+                        break;
+
+                    case 'approve_comment' :
+                        if ($this->getRequest()->isPost()) {
+                            return $this->getView()->json($this->
+                                    approveComment($this->getRequest()->getQuery('widget_comment_id', -1)));
                         }
                         break;
                 }
             }
 
             // get a comment form
-            $commentForm = $this->getCommentForm();
+            $commentForm = $this->getCommentForm($allowApprove);
 
             return $this->getView()->partial('comment/widget/comments-list', [
                 'base_url' => $this->getWidgetConnectionUrl(),
                 'comment_form' => false !== $commentForm ? $commentForm['form'] : null,
-                'comments' => $this->getCommentsList(),
-                'show_paginator' => $this->getModel()->getCommentsCount($this->
-                        pageId, $this->getPageSlug()) > (int) $this->getWidgetSetting('comment_per_page')
+                'comments' => $this->getCommentsList($allowApprove),
+                'show_paginator' => $this->getModel()->getCommentsCount($allowApprove,
+                        $this->pageId, $this->getPageSlug()) > (int) $this->getWidgetSetting('comment_per_page')
             ]);
         }
 
@@ -191,17 +233,18 @@ class CommentWidget extends PageAbstractWidget
     /**
      * Get comments list
      *
+     * @param boolean $allowApprove
      * @param boolean $getTree
      * @param integer $lastRightKey
      * @param boolean $asArray
      * @param array $ownReplies
      * @return string|array
      */
-    protected function getCommentsList($getTree = true, $lastRightKey = null, $asArray = false, $ownReplies = null)
+    protected function getCommentsList($allowApprove, $getTree = true, $lastRightKey = null, $asArray = false, $ownReplies = null)
     {
         // get comments
-        $commentsList = $this->getModel()->getComments($this->pageId, $this->
-                getPageSlug(), (int) $this->getWidgetSetting('comment_per_page'), $getTree, $lastRightKey, $ownReplies);
+        $commentsList = $this->getModel()->getComments($allowApprove, $this->pageId,
+                $this->getPageSlug(), (int) $this->getWidgetSetting('comment_per_page'), $getTree, $lastRightKey, $ownReplies);
 
         // process comments
         if (null != ($commentsList = $this->processComments($commentsList, $asArray))) {
@@ -227,7 +270,8 @@ class CommentWidget extends PageAbstractWidget
             foreach ($comments as $comment) {
                 $content = $this->getView()->partial('comment/widget/_comment-item-start', [
                     'id' => $comment['id'],
-                    'comment' => $comment['comment']
+                    'comment' => $comment['comment'],
+                    'approved' => $comment['active'] == CommentNestedSet::COMMENT_STATUS_ACTIVE
                 ]);
 
                 // check for children
