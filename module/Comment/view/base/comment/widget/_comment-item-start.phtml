@@ -1,4 +1,4 @@
-<div class="media <?php if (!$this->approved): ?>disapproved<?php endif ?>" comment-id="<?php echo (int) $this->id ?>">
+<div class="media<?php if (!$this->approved): ?> disapproved<?php else: ?> approved<?php endif ?><?php if ($this->own_comment): ?> own-comment<?php endif ?>" comment-id="<?php echo (int) $this->id ?>">
     <a name="comment-<?php echo (int) $this->id ?>"></a>
     <div class="media-left">
         <a href="#">
@@ -12,9 +12,11 @@
         <div class="comment">
             <div class="comment-actions-wrapper">
                 <a class="approve-comment" href="#"><?php echo $this->translate('Approve') ?></a>
-                <!-- <a href="#">Disapprove</a>
+                <a class="disapprove-comment" href="#"><?php echo $this->translate('Disapprove') ?></a>
+                <a class="delete-comment" href="#"><?php echo $this->translate('Delete') ?></a>
+                <!-- 
                 <a href="#">Edit</a>
-                <a href="#">Delete</a> -->
+                 -->
             </div>
             <p><?php echo  $this->escapeHtml($this->comment) ?></p>
         </div>

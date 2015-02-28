@@ -63,7 +63,9 @@ class CommentWidget extends CommentBase
                 'id',
                 'comment',
                 'parent_id',
-                'active'
+                'active',
+                'user_id',
+                'guest_id'
             ])
             ->where([
                 'page_id' => $pageId,

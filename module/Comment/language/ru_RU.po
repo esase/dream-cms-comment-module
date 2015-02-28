@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Dream CMS \"comment\" module\n"
 "POT-Creation-Date: 2013-07-19 11:59+0600\n"
-"PO-Revision-Date: 2015-02-27 18:47+0600\n"
+"PO-Revision-Date: 2015-02-28 18:11+0600\n"
 "Last-Translator: AlexE <alexermashev@gmail.com>\n"
 "Language-Team: \n"
 "Language: Русский\n"
@@ -15,6 +15,15 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "Comment on first"
+msgstr "Прокомментировать первым"
+
+msgid "Disapprove"
+msgstr "Дезактивировать"
+
+msgid "Notification"
+msgstr "Уведомление"
 
 msgid "Approve"
 msgstr "Активировать"
@@ -61,6 +70,24 @@ msgstr "Модуль позволяет публиковать коммента�
 msgid "Comment"
 msgstr "Комментарий"
 
+msgid "Event - Deleting comments"
+msgstr "Удаление комментариев"
+
+msgid "Event - Comment deleted by guest"
+msgstr "Гость удалил комментарий с идентификатором - \"%d\""
+
+msgid "Event - Comment deleted by user"
+msgstr "\"%s\" удалил(а) комментарий с идентификатором - \"%d\""
+
+msgid "Event - Disapproving comments"
+msgstr "Дезактивирование комментариев"
+
+msgid "Event - Comment disapproved by guest"
+msgstr "Гость дезактивировал комментарий с идентификатором - \"%d\""
+
+msgid "Event - Comment disapproved by user"
+msgstr "\"%s\" дезактивировал(а) комментарий с идентификатором - \"%d\""
+
 msgid "Event - Approving comments"
 msgstr "Активация комментариев"
 
@@ -90,3 +117,9 @@ msgstr "Дезактивирование комментариев"
 
 msgid "ACL - Approving comments"
 msgstr "Активация комментариев"
+
+msgid "ACL - Deleting comments"
+msgstr "Удаление комментариев"
+
+msgid "ACL - Deleting own comments"
+msgstr "Удаление собственных комментариев"

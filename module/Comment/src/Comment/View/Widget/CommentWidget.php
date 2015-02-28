@@ -42,10 +42,96 @@ class CommentWidget extends PageAbstractWidget
     }
 
     /**
+     * Disapprove comment
+     *
+     * @apram integer $commentId
+     * @return boolean|array
+     */
+    protected function disapproveComment($commentId)
+    {
+        if (AclService::checkPermission('comment_disapprove', false)) {
+            if (null != ($commentInfo = $this->getModel()->
+                    getCommentModel()->getCommentInfo($commentId, $this->pageId, $this->getPageSlug()))) {
+
+                // disapprove comment
+                if ($commentInfo['active'] == CommentNestedSet::COMMENT_STATUS_ACTIVE) {
+                    if (true === ($result = $this->getModel()->getCommentModel()->disapproveComment($commentInfo))) {
+                        // increase ACL track
+                        AclService::checkPermission('comment_disapprove');
+
+                        return [
+                            'status' => 'success',
+                            'message' => ''
+                        ];
+                    }
+                }
+            }
+
+            return [
+                'status' => 'error',
+                'message' => $this->translate('Error occured, please try again later')
+            ];
+        }
+
+        return false;
+    }
+
+    /**
+     * Delete comment
+     *
+     * @apram integer $commentId
+     * @return boolean|array
+     */
+    protected function deleteComment($commentId)
+    {
+        $deleteComment = AclService::checkPermission('comment_delete', false);
+        $deleteOwnComment = AclService::checkPermission('comment_delete_own', false);
+
+        if ($deleteComment || $deleteOwnComment) {
+            if (null != ($commentInfo = $this->getModel()->
+                    getCommentModel()->getCommentInfo($commentId, $this->pageId, $this->getPageSlug()))) {
+
+                $userId = !UserIdentityService::isGuest()
+                    ? UserIdentityService::getCurrentUserIdentity()['user_id']
+                    : $this->getModel()->getCommentModel()->getGuestId();
+
+                // check the comment's ownership
+                $isOwner = $commentInfo['user_id'] == $userId || $commentInfo['guest_id'] == $userId;
+
+                // delete comment
+                if ($deleteComment || ($deleteOwnComment && $isOwner)) {
+                    if (true === ($result = $this->getModel()->getCommentModel()->deleteComment($commentInfo))) {
+                        // increase ACL track
+                        if ($deleteOwnComment && $isOwner) {
+                            AclService::checkPermission('comment_delete_own');
+                        }
+
+                        if ($deleteComment) {
+                            AclService::checkPermission('comment_delete');
+                        }
+
+                        return [
+                            'status' => 'success',
+                            'message' => ''
+                        ];
+                    }
+                }
+            }
+
+            return [
+                'status' => 'error',
+                'message' => $this->translate('Error occured, please try again later')
+            ];
+        }
+
+        return false;
+    }
+
+    /**
      * Approve comment
      *
      * @apram integer $commentId
-     * @return boolean
+     * @return boolean|array
      */
     protected function approveComment($commentId)
     {
@@ -53,16 +139,24 @@ class CommentWidget extends PageAbstractWidget
             if (null != ($commentInfo = $this->getModel()->
                     getCommentModel()->getCommentInfo($commentId, $this->pageId, $this->getPageSlug()))) {
 
-                    
                 // approve comment
                 if ($commentInfo['active'] == CommentNestedSet::COMMENT_STATUS_NOT_ACTIVE) {
                     if (true === ($result = $this->getModel()->getCommentModel()->approveComment($commentInfo))) {
                         // increase ACL track
                         AclService::checkPermission('comment_approve');
-                        return true;
+
+                        return [
+                            'status' => 'success',
+                            'message' => ''
+                        ];
                     }
                 }
             }
+
+            return [
+                'status' => 'error',
+                'message' => $this->translate('Error occured, please try again later')
+            ];
         }
 
         return false;
@@ -82,8 +176,9 @@ class CommentWidget extends PageAbstractWidget
             $captchaEnabled = (int) $this->
                     getWidgetSetting('comment_form_captcha') && UserIdentityService::isGuest();
 
-            $commentStatus = '';
-            $commentInfo   = '';
+            $commentMessage = '';
+            $commentStatus  = '';
+            $commentInfo    = '';
 
             // get comment form
             $commentForm = $this->getServiceLocator()
@@ -123,27 +218,34 @@ class CommentWidget extends PageAbstractWidget
                             : null
                     ];
 
-                    $commentStatus = 'error';
                     $commentInfo = $this->getModel()->
                             getCommentModel()->addComment($pageUrl, $basicData, $this->pageId, $this->getPageSlug(), $replyId);
 
                     // return a status
                     if (is_array($commentInfo)) {
-                        $commentStatus = $commentInfo['active'] == CommentNestedSet::COMMENT_STATUS_ACTIVE
-                            ? 'success'
-                            : 'disapproved';
+                        $commentStatus = 'success';
+
+                        if ($commentInfo['active'] != CommentNestedSet::COMMENT_STATUS_ACTIVE) {
+                            $commentMessage = $this->translate('Your comment will be available after approving');
+                        }
 
                         // increase ACL track
                         AclService::checkPermission('comment_add');
+                    }
+                    else {
+                        $commentStatus = 'error';
+                        $commentMessage = $this->translate('Error occured, please try again later');
                     }
                 }
             }
 
             return [
-                'comment' => $commentInfo && $commentStatus == 'success' ? $this->processComments([$commentInfo], true) : '',
-                'status' => $commentStatus,
+                'comment' => $commentInfo && $commentInfo['active'] == CommentNestedSet::COMMENT_STATUS_ACTIVE
+                    ? $this->processComments([$commentInfo], true)
+                    : '',
+                'status'  => $commentStatus,
+                'message' => $commentMessage,
                 'form' => $this->getView()->partial('comment/widget/_comment-form', [
-                    'status' => $commentStatus,
                     'enable_captcha' => $captchaEnabled,
                     'guest_mode' => UserIdentityService::isGuest(),
                     'comment_form' => $commentForm->getForm()
@@ -162,16 +264,19 @@ class CommentWidget extends PageAbstractWidget
     public function getContent() 
     {//return false;
         // TODO:
-        // 1.Show empty block
+        // 1.Show empty block +
         // 2. Test with disapprove.+
-        // 4. Test ACL AGAIN!
+        // 4. Test ACL AGAIN! +
         // 5. Add notification about new messages.+
         // 6. TEST comments on different pages +
         // 7. Store ip +
         // 8 . Store email+
+        //10. DON't show access denied for absent comments (approve function)! +
+        
+        // 12. Add a confirm block for delete links
+        // 13. You need to get correct lastComment id after deleting
         // 9. Edit comments ????
-        //10. DON't show access denied for absent comments (approve function)!
-
+        //11. Send reply on email ???
         if (AclService::checkPermission('comment_view', false)) {
             // is approve allowing
             $allowApprove = AclService::checkPermission('comment_approve', false);
@@ -210,6 +315,20 @@ class CommentWidget extends PageAbstractWidget
                         if ($this->getRequest()->isPost()) {
                             return $this->getView()->json($this->
                                     approveComment($this->getRequest()->getQuery('widget_comment_id', -1)));
+                        }
+                        break;
+
+                    case 'disapprove_comment' :
+                        if ($this->getRequest()->isPost()) {
+                            return $this->getView()->json($this->
+                                    disapproveComment($this->getRequest()->getQuery('widget_comment_id', -1)));
+                        }
+                        break;
+
+                    case 'delete_comment' :
+                        if ($this->getRequest()->isPost()) {
+                            return $this->getView()->json($this->
+                                    deleteComment($this->getRequest()->getQuery('widget_comment_id', -1)));
                         }
                         break;
                 }
@@ -266,12 +385,17 @@ class CommentWidget extends PageAbstractWidget
         $processedComments = null;
 
         if (count($comments)) {
+            $userId = !UserIdentityService::isGuest()
+                ? UserIdentityService::getCurrentUserIdentity()['user_id']
+                : $this->getModel()->getCommentModel()->getGuestId();
+
             // process comments
             foreach ($comments as $comment) {
                 $content = $this->getView()->partial('comment/widget/_comment-item-start', [
                     'id' => $comment['id'],
                     'comment' => $comment['comment'],
-                    'approved' => $comment['active'] == CommentNestedSet::COMMENT_STATUS_ACTIVE
+                    'approved' => $comment['active'] == CommentNestedSet::COMMENT_STATUS_ACTIVE,
+                    'own_comment' => $userId == $comment['user_id'] || $userId == $comment['guest_id']
                 ]);
 
                 // check for children

@@ -14,7 +14,9 @@ INSERT INTO `acl_resource_connection` (`role`, `resource`) VALUES
 
 INSERT INTO `acl_resource` (`resource`, `description`, `module`) VALUES
 ('comment_approve', 'ACL - Approving comments', @moduleId),
-('comment_dsapprove', 'ACL - Disapproving comments', @moduleId);
+('comment_disapprove', 'ACL - Disapproving comments', @moduleId),
+('comment_delete', 'ACL - Deleting comments', @moduleId),
+('comment_delete_own', 'ACL - Deleting own comments', @moduleId);
 
 INSERT INTO `acl_resource` (`resource`, `description`, `module`) VALUES
 ('comment_add', 'ACL - Adding comments', @moduleId);
@@ -28,7 +30,9 @@ INSERT INTO `acl_resource_connection` (`role`, `resource`) VALUES
 
 INSERT INTO `application_event` (`name`, `module`, `description`) VALUES
 ('comment_add', @moduleId, 'Event - Adding comments'),
-('comment_approve', @moduleId, 'Event - Approving comments');
+('comment_approve', @moduleId, 'Event - Approving comments'),
+('comment_disapprove', @moduleId, 'Event - Disapproving comments'),
+('comment_delete', @moduleId, 'Event - Deleting comments');
 
 -- application settings
 
@@ -116,6 +120,7 @@ CREATE TABLE `comment_list` (
     `page_id` SMALLINT(5) UNSIGNED NOT NULL,
     `slug` VARCHAR(255) DEFAULT NULL,
     `user_id` INT(10) UNSIGNED DEFAULT NULL,
+    `guest_id` CHAR(32) DEFAULT NULL,
     `left_key` INT(10) NOT NULL DEFAULT '0',
     `right_key` INT(10) NOT NULL DEFAULT '0',
     `level` INT(10) NOT NULL DEFAULT '0',

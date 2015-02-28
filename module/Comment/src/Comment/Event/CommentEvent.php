@@ -21,6 +21,58 @@ class CommentEvent extends ApplicationAbstractEvent
     const APPROVE_COMMENT = 'comment_approve';
 
     /**
+     * Disapprove comment event
+     */
+    const DISAPPROVE_COMMENT = 'comment_disapprove';
+
+    /**
+     * Delete comment event
+     */
+    const DELETE_COMMENT = 'comment_delete';
+
+    /**
+     * Fire delete comment event
+     *
+     * @param $commentId
+     * @return void
+     */
+    public static function fireDeleteCommentEvent($commentId)
+    {
+        // event's description
+        $eventDesc = UserIdentityService::isGuest()
+            ? 'Event - Comment deleted by guest'
+            : 'Event - Comment deleted by user';
+
+        $eventDescParams = UserIdentityService::isGuest()
+            ? [$commentId]
+            : [UserIdentityService::getCurrentUserIdentity()['nick_name'], $commentId];
+
+        self::fireEvent(self::DELETE_COMMENT, 
+                $commentId, UserIdentityService::getCurrentUserIdentity()['user_id'], $eventDesc, $eventDescParams);
+    }
+
+    /**
+     * Fire disapprove comment event
+     *
+     * @param $commentId
+     * @return void
+     */
+    public static function fireDisapproveCommentEvent($commentId)
+    {
+        // event's description
+        $eventDesc = UserIdentityService::isGuest()
+            ? 'Event - Comment disapproved by guest'
+            : 'Event - Comment disapproved by user';
+
+        $eventDescParams = UserIdentityService::isGuest()
+            ? [$commentId]
+            : [UserIdentityService::getCurrentUserIdentity()['nick_name'], $commentId];
+
+        self::fireEvent(self::DISAPPROVE_COMMENT, 
+                $commentId, UserIdentityService::getCurrentUserIdentity()['user_id'], $eventDesc, $eventDescParams);
+    }
+
+    /**
      * Fire approve comment event
      *
      * @param $commentId

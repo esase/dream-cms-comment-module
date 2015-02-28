@@ -6,6 +6,8 @@ use Application\Utility\ApplicationErrorLogger;
 use Application\Model\ApplicationAbstractNestedSet;
 use Zend\Db\Sql\Select;
 use Zend\Http\PhpEnvironment\RemoteAddress;
+use Zend\Session\Container as SessionContainer;
+use Zend\Math\Rand;
 use Exception;
 
 class CommentNestedSet extends ApplicationAbstractNestedSet 
@@ -29,6 +31,107 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
      * Comment status not hidden
      */
     const COMMENT_STATUS_NOT_HIDDEN = null;
+
+    /**
+     * Comment guest id length
+     */
+    CONST COMMENT_GUEST_ID_LENGTH = 32;
+
+    /**
+     * Get guest id
+     *
+     * @return string
+     */
+    public function getGuestId()
+    {
+        $container = new SessionContainer('comment');
+
+        // generate custom guest id
+        if (empty($container->guestId)) {
+            $container->guestId = Rand::
+                    getString(self::COMMENT_GUEST_ID_LENGTH, 'abcdefghijklmnopqrstuvwxyz', true);
+        }
+
+        return $container->guestId;
+    }
+
+    /**
+     * Delete comment
+     * 
+     * @param array $commentInfo
+     *  integer id
+     *  integer page_id
+     *  integer left_key
+     *  integer right_key
+     *  string slug
+     * @return string|boolean
+     */
+    public function deleteComment(array $commentInfo)
+    {
+        $filter = [
+            'page_id' => $commentInfo['page_id'],
+            'slug' => $commentInfo['slug']
+        ];
+
+        if (true === ($result = $this->
+                deleteNode($commentInfo[$this->left], $commentInfo[$this->right], $filter))) {
+
+            // fire the delete comment event
+            CommentEvent::fireDeleteCommentEvent($commentInfo['id']);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Disapprove comment
+     *
+     * @param array $commentInfo
+     *  integer id
+     *  integer page_id
+     *  integer left_key
+     *  integer right_key
+     *  string slug
+     * @return boolean|string
+     */
+    public function disapproveComment(array $commentInfo)
+    {
+        try {
+            $this->tableGateway->getAdapter()->getDriver()->getConnection()->beginTransaction();
+
+            $this->tableGateway->update([
+                'active' => self::COMMENT_STATUS_NOT_ACTIVE,
+                'hidden' => self::COMMENT_STATUS_HIDDEN
+            ], [$this->nodeId => $commentInfo['id']]);
+
+            $filter = [
+                'page_id' => $commentInfo['page_id'],
+                'slug' => $commentInfo['slug']
+            ];
+
+            // add the hidden flag for all siblings comments
+            $result = $this->updateSiblingsNodes([
+                'hidden' => self::COMMENT_STATUS_HIDDEN
+            ], $commentInfo[$this->left], $commentInfo[$this->right], null, $filter, false);
+
+            if (true !== $result) {
+                $this->tableGateway->getAdapter()->getDriver()->getConnection()->rollback();
+                return $result;
+            }
+
+            $this->tableGateway->getAdapter()->getDriver()->getConnection()->commit();
+        }
+        catch (Exception $e) {
+            $this->tableGateway->getAdapter()->getDriver()->getConnection()->rollback();
+
+            ApplicationErrorLogger::log($e);
+            return $e->getMessage();
+        }
+
+        // fire the disapprove comment event
+        CommentEvent::fireDisapproveCommentEvent($commentInfo['id']);
+        return true;
+    }
 
     /**
      * Approve comment
@@ -187,6 +290,7 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
             'page_id' => $pageId,
             'slug' => $slug,
             'ip' => ip2long($remote->getIpAddress()),
+            'guest_id' => empty($basicData['user_id']) ? $this->getGuestId() : null,
             'created' => time()
         ]);
 

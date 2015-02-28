@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Dream CMS \"comment\" module\n"
 "POT-Creation-Date: 2013-07-19 11:59+0600\n"
-"PO-Revision-Date: 2015-02-27 18:47+0600\n"
+"PO-Revision-Date: 2015-02-28 18:11+0600\n"
 "Last-Translator: AlexE <alexermashev@gmail.com>\n"
 "Language-Team: \n"
 "Language: English\n"
@@ -14,6 +14,15 @@ msgstr ""
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Comment on first"
+msgstr "Comment on first"
+
+msgid "Disapprove"
+msgstr "Disapprove"
+
+msgid "Notification"
+msgstr "Notification"
 
 msgid "Approve"
 msgstr "Approve"
@@ -60,6 +69,24 @@ msgstr "Module allows to publish comments on the site"
 msgid "Comment"
 msgstr "Comment"
 
+msgid "Event - Deleting comments"
+msgstr "Deleting comments"
+
+msgid "Event - Comment deleted by guest"
+msgstr "Guest deleted the comment with id - \"%d\""
+
+msgid "Event - Comment deleted by user"
+msgstr "\"%s\" deleted the comment with id - \"%d\""
+
+msgid "Event - Disapproving comments"
+msgstr "Disapproving comments"
+
+msgid "Event - Comment disapproved by guest"
+msgstr "Guest disapproved the comment with id - \"%d\""
+
+msgid "Event - Comment disapproved by user"
+msgstr "\"%s\" disapproved the comment with id - \"%d\""
+
 msgid "Event - Approving comments"
 msgstr "Approving comments"
 
@@ -89,3 +116,9 @@ msgstr "Disapproving comments"
 
 msgid "ACL - Approving comments"
 msgstr "Approving comments"
+
+msgid "ACL - Deleting comments"
+msgstr "Deleting comments"
+
+msgid "ACL - Deleting own comments"
+msgstr "Deleting own comments"

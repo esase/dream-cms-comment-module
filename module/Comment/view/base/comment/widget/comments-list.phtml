@@ -1,9 +1,12 @@
 <div id="global-comments-wrapper">
 
-    <div id="comments-action-denied" class="alert alert-danger">
-        <button type="button" class="close" >&times;</button>
-        <?php echo $this->translate('Access Denied') ?>
-    </div>
+    <?php 
+        echo $this->partial('partial/popup', [
+            'popup_id' => 'comment-notification-wrapper',
+            'title' => 'Notification',
+            'body' => '<div id="comment-notification"></div>'
+        ]) 
+    ?>
 
     <?php if ($this->comment_form): ?>
         <div class="comment-reply-form-wrapper">
@@ -15,6 +18,10 @@
         <?php if ($this->comments): ?>
             <?php echo $this->comments ?>
         <?php endif ?>
+    </div>
+
+    <div id="comments-empty-wrapper" class="alert alert-warning">
+        <?php echo $this->translate('Comment on first') ?>
     </div>
 
     <?php if ($this->show_paginator): ?>
@@ -32,11 +39,24 @@
 
     // init comments
     comment.setBaseUrl("<?php echo $this->escapeJs($this->base_url) ?>")
+        .setAccessDeniedMessage("<?php echo $this->escapeJs($this->translate('Access Denied')) ?>")
         .allowAddComments(<?php echo $this->aclCheckPermission("comment_add") ? 'true' : 'false' ?>)
         .allowApproveComments(<?php echo $this->aclCheckPermission("comment_approve") ? 'true' : 'false' ?>)
+        .allowDisapproveComments(<?php echo $this->aclCheckPermission("comment_disapprove") ? 'true' : 'false' ?>)
+        .allowDeleteComments(<?php echo $this->aclCheckPermission("comment_delete") ? 'true' : 'false' ?>)
+        .allowDeleteOwnComments(<?php echo $this->aclCheckPermission("comment_delete_own") ? 'true' : 'false' ?>)
         .init();
 </script>
 <style>
+    
+    div#global-comments-wrapper {
+        
+    }
+    
+    div#global-comments-wrapper div#comments-paginator-wrapper {
+        margin-bottom:10px;
+    }
+
     div#global-comments-wrapper div#comments-action-denied {
         display: none;
     }
@@ -46,6 +66,7 @@
         padding:15px;
         margin-bottom:15px;
         position: relative;
+        color: #333333;
     }
 
     div#global-comments-wrapper div.comment-reply-form-wrapper .form-control {
@@ -67,8 +88,11 @@
         position: relative;
     }
 
+   
+
     div#global-comments-wrapper #comments-list-wrapper .media {
-        color:#333;  
+        color:#333;
+        overflow: hidden;
     }
 
     div#global-comments-wrapper #comments-list-wrapper .disapproved {
@@ -77,6 +101,10 @@
 
     div#global-comments-wrapper #comments-list-wrapper .media-body{
         width: 100%;
+    }
+
+    div#global-comments-wrapper #comments-list-wrapper .media-body .comment{
+        
     }
 
     div#global-comments-wrapper #comments-list-wrapper .media-body .comment-actions-wrapper {
@@ -88,5 +116,10 @@
     div#global-comments-wrapper #comments-list-wrapper .media-body .comment-actions-wrapper a {
         margin-right:5px;
         display: none;
+    }
+
+    div#global-comments-wrapper div#comments-empty-wrapper {
+        display: none;
+        margin:0;
     }
 </style>
