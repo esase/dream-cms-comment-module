@@ -277,6 +277,7 @@ class CommentWidget extends PageAbstractWidget
         // 13. You need to get correct lastComment id after deleting
         // 9. Edit comments ????
         //11. Send reply on email ???
+        // 14. Show only small part of comment if it long
         if (AclService::checkPermission('comment_view', false)) {
             // is approve allowing
             $allowApprove = AclService::checkPermission('comment_approve', false);

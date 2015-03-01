@@ -37,16 +37,16 @@ function Comment()
     var baseUrl;
 
     /**
-     * Last comment id
-     * @var integer
-     */
-    var lastCommentId;
-
-    /**
      * Access denied message
      * @var string
      */
     var accessDeniedMessage;
+
+    /**
+     * Scroll speed
+     * @var integer
+     */
+    var scrollSpeed = 800;
 
     //-- protected functions --//
 
@@ -219,6 +219,17 @@ function Comment()
     }
 
     /**
+     * Get last comment id
+     *
+     * @return inetger
+     */
+    var getLastCommentId = function()
+    {
+        var $lastComment = $("#global-comments-wrapper #comments-list-wrapper").find(".media:last");
+        return $lastComment.length ? $lastComment.attr("comment-id") : 0;
+    }
+
+    /**
      * Init delete links
      *
      * @return void
@@ -252,14 +263,15 @@ function Comment()
                     }
                     else {
                         if (data.status == "success") {
-                            $parent.remove();
-
-                            // check the paginator exists
-                            if (!$("#comments-paginator-wrapper").length
-                                    && !$("#global-comments-wrapper #comments-list-wrapper .media:first").length) {
-
-                                showEmptyCommentsWrapper();
-                            }
+                            $parent.slideUp(function(){
+                                $(this).remove();
+    
+                                // check the comments exists
+                                if (!$("#global-comments-wrapper #comments-list-wrapper .media:first").length) {
+                                    // refresh page
+                                    location.reload();
+                                }
+                            });
                         }
 
                         if (data.message) {
@@ -342,31 +354,16 @@ function Comment()
     var removePaginator = function()
     {
         $("#comments-paginator-wrapper").remove();
-
-        // show the empty comments wrappers
-        if (!$("#global-comments-wrapper #comments-list-wrapper .media:first").length) {
-            showEmptyCommentsWrapper();
-        }
     }
 
     /**
-     * Hide comments empty wrapper
+     * Remove comments empty wrapper
      *
      * @return void
      */
-    var hideEmptyCommentsWrapper = function()
+    var removeEmptyCommentsWrapper = function()
     {
-        $("#global-comments-wrapper #comments-empty-wrapper:not(:hidden)").hide();
-    }
-
-    /**
-     * Show comments empty wrapper
-     *
-     * @return void
-     */
-    var showEmptyCommentsWrapper = function()
-    {
-        $("#global-comments-wrapper #comments-empty-wrapper").css("display","block");
+        $("#global-comments-wrapper #comments-empty-wrapper").remove();
     }
 
     /**
@@ -460,7 +457,7 @@ function Comment()
     {
         $("#global-comments-wrapper #comments-paginator-wrapper").off().bind("click", function(e) {
             e.preventDefault();
-            var paginatorUrl = baseUrl + "&widget_action=get_comments&widget_last_comment=" + lastCommentId;
+            var paginatorUrl = baseUrl + "&widget_action=get_comments&widget_last_comment=" + getLastCommentId();
 
             // get next comments
             ajaxQuery($("#comments-list-wrapper"), paginatorUrl, function(data) {
@@ -494,29 +491,36 @@ function Comment()
      */
     var addComments = function(comments, isOwnReply)
     {
-        hideEmptyCommentsWrapper();
-
-        $commentsList = $("#comments-list-wrapper");
+        removeEmptyCommentsWrapper();
+        $commentsList = $("#global-comments-wrapper #comments-list-wrapper");
         $.each(comments, function(key, value) {
             // add the comment
-            if (typeof isOwnReply != "undefined" && isOwnReply) {
-                if (value.parent_id) {
-                    $commentsList.find(".media[comment-id='" + value.parent_id + "'] " + ".comment-replies" + ":first").prepend(value.comment);
+            var $comment = $(value.comment);
 
-                    // remember the last added comment
-                    lastCommentId = value.id;
-                }
-                else {
-                    $commentsList.prepend(value.comment);
-                }
-            }
-            else {
-                // remember the last added comment
-                lastCommentId = value.id;
+            if (typeof isOwnReply != "undefined" && isOwnReply) {
+                $comment.css({"visibility" : "hidden", "height" : "1px"});
 
                 value.parent_id
-                    ? $commentsList.find(".media[comment-id='" + value.parent_id + "'] " + ".comment-replies" + ":first").append(value.comment)
-                    : $commentsList.append(value.comment);
+                    ? $commentsList.find(".media[comment-id='" + value.parent_id + "'] " + ".comment-replies" + ":first").append($comment)
+                    : $commentsList.prepend($comment);
+ 
+                var topOffset = $comment.offset().top - parseInt($comment.css("marginTop"));
+                $comment.hide().css({"visibility" : "visible", "height" : "auto"});
+
+                // scroll to the added own comment
+                setTimeout(function(){
+                    $('html, body').animate({
+                        scrollTop: topOffset
+                    }, scrollSpeed, function(){
+                        // show the comment
+                        $comment.slideDown();
+                    })
+                }, 50);
+            }
+            else {
+                value.parent_id
+                    ? $commentsList.find(".media[comment-id='" + value.parent_id + "'] " + ".comment-replies" + ":first").append($comment)
+                    : $commentsList.append($comment);
             }
         });
 
@@ -669,15 +673,9 @@ function Comment()
             initDeleteLinks();
         }
 
-        // get a last comment id
-        $lastComment = $("#global-comments-wrapper").find(".media:last");
-        lastCommentId = $lastComment.length
-            ? $lastComment.attr("comment-id")
-            : '';
-
-        // show the empty comments wrappers
-        if (!$("#global-comments-wrapper #comments-list-wrapper .media:first").length) {
-            showEmptyCommentsWrapper();
+        // hide the empty comments wrappers
+        if ($("#global-comments-wrapper #comments-list-wrapper .media:first").length) {
+            removeEmptyCommentsWrapper();
         }
     }
 }
