@@ -394,6 +394,7 @@ class CommentWidget extends PageAbstractWidget
             foreach ($comments as $comment) {
                 $content = $this->getView()->partial('comment/widget/_comment-item-start', [
                     'id' => $comment['id'],
+                    'parent_id' => $comment['parent_id'],
                     'comment' => $comment['comment'],
                     'approved' => $comment['active'] == CommentNestedSet::COMMENT_STATUS_ACTIVE,
                     'own_comment' => $userId == $comment['user_id'] || $userId == $comment['guest_id']

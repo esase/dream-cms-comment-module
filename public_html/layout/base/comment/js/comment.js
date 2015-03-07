@@ -43,10 +43,10 @@ function Comment()
     var accessDeniedMessage;
 
     /**
-     * Scroll speed
-     * @var integer
+     * Comments structure
+     * @var array
      */
-    var scrollSpeed = 800;
+    var commentsStructure = [];
 
     //-- protected functions --//
 
@@ -219,17 +219,6 @@ function Comment()
     }
 
     /**
-     * Get last comment id
-     *
-     * @return inetger
-     */
-    var getLastCommentId = function()
-    {
-        var $lastComment = $("#global-comments-wrapper #comments-list-wrapper").find(".media:last");
-        return $lastComment.length ? $lastComment.attr("comment-id") : 0;
-    }
-
-    /**
      * Init delete links
      *
      * @return void
@@ -263,15 +252,19 @@ function Comment()
                     }
                     else {
                         if (data.status == "success") {
-                            $parent.slideUp(function(){
-                                $(this).remove();
-    
-                                // check the comments exists
-                                if (!$("#global-comments-wrapper #comments-list-wrapper .media:first").length) {
-                                    // refresh page
-                                    location.reload();
-                                }
-                            });
+                            // remove comment from a memory
+                            if (removeCommentFromMemory($parent.attr("comment-id"))) {
+                                $parent.slideUp(function(){
+                                    $(this).remove();
+        
+                                    // check the comments exists
+                                    if (!$("#global-comments-wrapper #comments-list-wrapper .media:first").length) {
+                                        // refresh page
+                                        removePaginator();
+                                        location.reload();
+                                    }
+                                });
+                            }
                         }
 
                         if (data.message) {
@@ -457,7 +450,7 @@ function Comment()
     {
         $("#global-comments-wrapper #comments-paginator-wrapper").off().bind("click", function(e) {
             e.preventDefault();
-            var paginatorUrl = baseUrl + "&widget_action=get_comments&widget_last_comment=" + getLastCommentId();
+            var paginatorUrl = baseUrl + "&widget_action=get_comments&widget_last_comment=" + getLastCommentFromMemory();
 
             // get next comments
             ajaxQuery($("#comments-list-wrapper"), paginatorUrl, function(data) {
@@ -501,26 +494,18 @@ function Comment()
                 $comment.css({"visibility" : "hidden", "height" : "1px"});
 
                 value.parent_id
-                    ? $commentsList.find(".media[comment-id='" + value.parent_id + "'] " + ".comment-replies" + ":first").append($comment)
+                    ? $commentsList.find(".media[comment-id='" + value.parent_id + "'] " + ".comment-replies" + ":first").prepend($comment)
                     : $commentsList.prepend($comment);
  
-                var topOffset = $comment.offset().top - parseInt($comment.css("marginTop"));
-                $comment.hide().css({"visibility" : "visible", "height" : "auto"});
-
-                // scroll to the added own comment
-                setTimeout(function(){
-                    $('html, body').animate({
-                        scrollTop: topOffset
-                    }, scrollSpeed, function(){
-                        // show the comment
-                        $comment.slideDown();
-                    })
-                }, 50);
+                $comment.hide().css({"visibility" : "visible", "height" : "auto"}).slideDown();
+                saveCommentInMemory(value.id, value.parent_id);
             }
             else {
                 value.parent_id
                     ? $commentsList.find(".media[comment-id='" + value.parent_id + "'] " + ".comment-replies" + ":first").append($comment)
                     : $commentsList.append($comment);
+
+                saveCommentInMemory(value.id, value.parent_id, "bottom");
             }
         });
 
@@ -543,6 +528,160 @@ function Comment()
         !allowDeleteComments && !allowDeleteOwnComments
             ? removeDeleteElements()
             : initDeleteLinks();
+    }
+
+    /**
+     * Remove comment from memory
+     *
+     * @param integer id
+     * @param object children
+     * @return boolean
+     */
+    var removeCommentFromMemory = function(id, children)
+    {
+        var deleteResult = false;
+        var comments = children ? children : commentsStructure;
+
+        $.each(comments, function(index, comment) {
+            var commentChildren = comment.children;
+
+            // we've found the needed comment
+            if (comment.id == id) {
+                comments.splice(index, 1);
+
+                // break the iteration
+                deleteResult = true;
+                return false;
+            }
+
+            // search into children
+            if (commentChildren.length) {
+                deleteResult = removeCommentFromMemory(id, commentChildren);
+
+                if (deleteResult) {
+                    // break the iteration
+                    return false;
+                }
+            }
+        });
+
+        return deleteResult;
+    }
+
+    /**
+     * Save comment in memory
+     *
+     * @param integer id
+     * @param integer parentId
+     * @param string topLevelDirection (top|bottom)
+     * @param object children
+     * @return boolean
+     */
+    var saveCommentInMemory = function(id, parentId, topLevelDirection, children)
+    {
+        var addResult = false;
+
+        // recursive search
+        if (parentId > 0) {
+            $.each((children ? children : commentsStructure), function(index, comment) {
+                var children = comment.children;
+
+                // we've found needed comment
+                if (comment.id == parentId) {
+                    // add comment to the end
+                    children.splice(children.length, 0, {
+                        'id': id,
+                        'children': []
+                    });
+
+                    // break the iteration
+                    addResult = true;
+                    return false;
+                }
+
+                // search into children
+                if (children.length) {
+                    addResult = saveCommentInMemory(id, parentId, topLevelDirection, children);
+
+                    if (addResult) {
+                        // break the iteration
+                        return false;
+                    }
+                }
+            });
+ 
+            return addResult;
+        }
+ 
+        // add comment to the top
+        if (!topLevelDirection || topLevelDirection === "top") {
+            commentsStructure.splice(0, 0, {
+                'id': id,
+                'children': []
+            });
+        }
+        else {
+            // add comment to the bottom
+            commentsStructure.splice(commentsStructure.length, 0, {
+                'id': id,
+                'children': []
+            });
+        }
+
+        return true;
+    }
+
+    /**
+     * Get comments object copy
+     *
+     * @param object children
+     * @return object
+     */
+    var getCommentObjectCopy = function(children)
+    {
+        var commentsStructureCopy;
+
+        if (!children) {
+            commentsStructureCopy = commentsStructure.constructor();
+            for (var attr in commentsStructure) {
+                if (commentsStructure.hasOwnProperty(attr)) {
+                    commentsStructureCopy[attr] = commentsStructure[attr];
+                }
+            }
+
+            return commentsStructureCopy;
+        }
+
+        commentsStructureCopy = children.constructor();
+        for (var attr in children) {
+            if (children.hasOwnProperty(attr)) {
+                commentsStructureCopy[attr] = children[attr];
+            }
+        }
+
+        return commentsStructureCopy;
+    }
+
+    /**
+     * Get last comment from memory
+     *
+     * @param object children
+     * @return integer
+     */
+    var getLastCommentFromMemory = function(children)
+    {
+        var lastComment = getCommentObjectCopy(children);
+        lastComment = lastComment.pop();
+
+        if (lastComment) {
+            // check for children
+            if (!lastComment.children.length) {
+                return lastComment.id;
+            }
+
+            // process children
+            return getLastCommentFromMemory(lastComment.children);
+        }
     }
 
     //-- public functions --//
@@ -673,8 +812,14 @@ function Comment()
             initDeleteLinks();
         }
 
+        // build comments structure in a memory
+        $("#global-comments-wrapper #comments-list-wrapper .media").each(function(key, comment) {
+            saveCommentInMemory($(comment).
+                    attr("comment-id"), $(comment).attr("comment-parent"), "bottom");
+        });
+
         // hide the empty comments wrappers
-        if ($("#global-comments-wrapper #comments-list-wrapper .media:first").length) {
+        if (commentsStructure.length) {
             removeEmptyCommentsWrapper();
         }
     }

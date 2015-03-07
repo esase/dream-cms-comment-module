@@ -1,4 +1,4 @@
-<div class="media<?php if (!$this->approved): ?> disapproved<?php else: ?> approved<?php endif ?><?php if ($this->own_comment): ?> own-comment<?php endif ?>" comment-id="<?php echo (int) $this->id ?>">
+<div class="media<?php if (!$this->approved): ?> disapproved<?php else: ?> approved<?php endif ?><?php if ($this->own_comment): ?> own-comment<?php endif ?>" comment-id="<?php echo (int) $this->id ?>" comment-parent="<?php echo (int) $this->parent_id ?>">
     <a name="comment-<?php echo (int) $this->id ?>"></a>
     <div class="media-left">
         <a href="#">
