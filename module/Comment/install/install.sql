@@ -16,7 +16,9 @@ INSERT INTO `acl_resource` (`resource`, `description`, `module`) VALUES
 ('comment_approve', 'ACL - Approving comments', @moduleId),
 ('comment_disapprove', 'ACL - Disapproving comments', @moduleId),
 ('comment_delete', 'ACL - Deleting comments', @moduleId),
-('comment_delete_own', 'ACL - Deleting own comments', @moduleId);
+('comment_delete_own', 'ACL - Deleting own comments', @moduleId),
+('comment_edit', 'ACL - Editing comments', @moduleId),
+('comment_edit_own', 'ACL - Editing own comments', @moduleId);
 
 INSERT INTO `acl_resource` (`resource`, `description`, `module`) VALUES
 ('comment_add', 'ACL - Adding comments', @moduleId);
@@ -32,7 +34,8 @@ INSERT INTO `application_event` (`name`, `module`, `description`) VALUES
 ('comment_add', @moduleId, 'Event - Adding comments'),
 ('comment_approve', @moduleId, 'Event - Approving comments'),
 ('comment_disapprove', @moduleId, 'Event - Disapproving comments'),
-('comment_delete', @moduleId, 'Event - Deleting comments');
+('comment_delete', @moduleId, 'Event - Deleting comments'),
+('comment_edit', @moduleId, 'Event - Editing comments');
 
 -- application settings
 
@@ -41,7 +44,7 @@ INSERT INTO `application_setting_category` (`name`, `module`) VALUES
 SET @settingsCategoryId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
-('comments_auto_approve', 'Comments auto approve', NULL, 'checkbox', NULL, 1, @settingsCategoryId, @moduleId, 1, NULL, NULL, NULL);
+('comments_auto_approve', 'Comments auto approve', NULL, 'checkbox', NULL, 1, @settingsCategoryId, @moduleId, NULL, NULL, NULL, NULL);
 SET @settingId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
@@ -93,6 +96,13 @@ SET @widgetSettingId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `page_widget_setting_default_value` (`setting_id`, `value`, `language`) VALUES
 (@widgetSettingId, '20', NULL);
+
+INSERT INTO `page_widget_setting` (`name`, `widget`, `label`, `type`, `required`, `order`, `category`, `description`, `check`,  `check_message`, `values_provider`) VALUES
+('comment_visible_chars', @widgetId, 'Visible count of chars in comments', 'integer', 1, 3, @displaySettingCategoryId, NULL, 'return intval(''__value__'') > 0;', 'Value should be greater than 0', NULL);
+SET @widgetSettingId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_widget_setting_default_value` (`setting_id`, `value`, `language`) VALUES
+(@widgetSettingId, '450', NULL);
 
 INSERT INTO `page_system_widget_hidden` (`page_id`, `widget_id`) VALUES
 (2,  @widgetId),

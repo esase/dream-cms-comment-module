@@ -31,6 +31,32 @@ class CommentEvent extends ApplicationAbstractEvent
     const DELETE_COMMENT = 'comment_delete';
 
     /**
+     * Edit comment event
+     */
+    const EDIT_COMMENT = 'comment_edit';
+
+    /**
+     * Fire edit comment event
+     *
+     * @param $commentId
+     * @return void
+     */
+    public static function fireEditCommentEvent($commentId)
+    {
+        // event's description
+        $eventDesc = UserIdentityService::isGuest()
+            ? 'Event - Comment edited by guest'
+            : 'Event - Comment edited by user';
+
+        $eventDescParams = UserIdentityService::isGuest()
+            ? [$commentId]
+            : [UserIdentityService::getCurrentUserIdentity()['nick_name'], $commentId];
+
+        self::fireEvent(self::EDIT_COMMENT, 
+                $commentId, UserIdentityService::getCurrentUserIdentity()['user_id'], $eventDesc, $eventDescParams);
+    }
+
+    /**
      * Fire delete comment event
      *
      * @param $commentId

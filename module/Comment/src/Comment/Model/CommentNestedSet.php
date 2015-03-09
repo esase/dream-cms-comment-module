@@ -320,4 +320,70 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
 
         return $commentId;
     }
+
+    /**
+     * Edit comment
+     *
+     * @param array $commentInfo
+     *  integer id
+     *  integer page_id
+     *  integer left_key
+     *  integer right_key
+     *  string slug
+     * @param array $basicData
+     *      integer active
+     *      string comment
+     *      string name
+     *      string email
+     * @param integer $pageId
+     * @param string $slug
+     * @return array|string
+     */
+    public function editComment($commentInfo, array $basicData, $pageId, $slug = null)
+    {
+        try {
+            $this->tableGateway->getAdapter()->getDriver()->getConnection()->beginTransaction();
+
+            $hideSiblings = false;
+            if ($basicData['active'] != self::COMMENT_STATUS_ACTIVE) {
+                $hideSiblings = true;
+                $basicData = array_merge($basicData, [
+                    'hidden' => self::COMMENT_STATUS_HIDDEN
+                ]);
+            }
+
+            $this->tableGateway->update($basicData, [$this->nodeId => $commentInfo['id']]);
+
+            // add the hidden flag for all siblings comments
+            if ($hideSiblings) {
+                $filter = [
+                    'page_id' => $commentInfo['page_id'],
+                    'slug' => $commentInfo['slug']
+                ];
+
+                $result = $this->updateSiblingsNodes([
+                    'hidden' => self::COMMENT_STATUS_HIDDEN
+                ], $commentInfo[$this->left], $commentInfo[$this->right], null, $filter, false);
+    
+                if (true !== $result) {
+                    $this->tableGateway->getAdapter()->getDriver()->getConnection()->rollback();
+                    return $result;
+                }
+            }
+
+            $this->tableGateway->getAdapter()->getDriver()->getConnection()->commit();
+        }
+        catch (Exception $e) {
+            $this->tableGateway->getAdapter()->getDriver()->getConnection()->rollback();
+
+            ApplicationErrorLogger::log($e);
+            return $e->getMessage();
+        }
+
+        $commentInfo = $this->getCommentInfo($commentInfo['id'],  $commentInfo['page_id'], $commentInfo['slug']);
+
+        // fire the edit comment event
+        CommentEvent::fireEditCommentEvent($commentInfo['id']);
+        return $commentInfo;
+    }
 }

@@ -1,5 +1,16 @@
-function Comment()
+/**
+ * Comment
+ *
+ * @var object translationsList
+ */
+function Comment(translationsList)
 {
+    /**
+     * Translations
+     * @var object
+     */
+    var translations = translationsList;
+
     /**
      * Allow add comments
      * @var boolean
@@ -29,6 +40,18 @@ function Comment()
      * @var boolean
      */
     var allowDeleteOwnComments = false;
+
+    /**
+     * Allow edit comments
+     * @var boolean
+     */
+    var allowEditComments = false;
+
+    /**
+     * Allow edit own comments
+     * @var boolean
+     */
+    var allowEditOwnComments = false;
 
     /**
      * Base url
@@ -67,9 +90,10 @@ function Comment()
     /**
      * Clone reply form
      *
+     * @apram object comment
      * @return object
      */
-    var cloneReplyForm = function()
+    var cloneReplyForm = function(comment)
     {
         var $replyForm = $("#global-comments-wrapper > .comment-reply-form-wrapper").clone(true);
 
@@ -77,6 +101,15 @@ function Comment()
         $replyForm.find("ul").remove();
         $replyForm.find(".primary-data").val("");
         $replyForm.find(".alert").remove();
+
+        if (comment) {
+            $replyForm.addClass("edit-mode");
+
+            // fill the form with values
+            $.each(comment, function(index, value) {
+                $replyForm.find(":input[name='" + index + "']").val(value);
+            });
+        }
 
         return $replyForm;
     }
@@ -94,14 +127,15 @@ function Comment()
 
             if ($(this).hasClass("active-reply")) {
                 // delete the reply form
-                $(this).removeClass("active-reply").parents(".reply-link-wrapper").find(".comment-reply-form-wrapper").remove();
+                $(this).removeClass("active-reply").parents(".reply-link-wrapper:first").find(".comment-reply-form-wrapper").remove();
             }
             else {
                 // close a previously opened reply form
                 $("#global-comments-wrapper #comments-list-wrapper .comment-reply-form-wrapper").remove();
                 $("#global-comments-wrapper #comments-list-wrapper .reply-link-wrapper a").removeClass("active-reply");
+                $("#global-comments-wrapper #comments-list-wrapper .comment-actions-wrapper a.edit-comment").removeClass("active-edit");
 
-                $(this).addClass("active-reply").parents(".reply-link-wrapper").append(cloneReplyForm()).html();
+                $(this).addClass("active-reply").parents(".reply-link-wrapper:first").append(cloneReplyForm()).html();
             }
         });
     }
@@ -230,53 +264,125 @@ function Comment()
         // hide all delete links
         $wrapper.find(".comment-actions-wrapper a.delete-comment").off().hide();
 
-        // show links only for delete comments
+        // show links only for allowed comments
         $wrapper.find(".media-body a.delete-comment").filter(function() {
             return allowDeleteComments || (allowDeleteOwnComments && $(this).parents(".media:first").hasClass("own-comment"));
         }).css("display", "inline").bind("click", function(e){
             e.preventDefault();
-
-            var $parent = $(this).parents(".media:first");
-            var actionUrl = baseUrl + "&widget_action=delete_comment&widget_comment_id=" + $parent.attr("comment-id");
             var $link = $(this);
 
-            // delete comment
-            ajaxQuery($("#comments-list-wrapper"), actionUrl, function(data) {
-                if (data) {
-                    data = $.parseJSON(data);
+            // show a confirm popup window
+            showConfirmPopup(translations.confirm_yes, translations.confirm_no, $(this), function(){
+                var $parent = $link.parents(".media:first");
+                var actionUrl = baseUrl + "&widget_action=delete_comment&widget_comment_id=" + $parent.attr("comment-id");
 
-                    // permission denied for disapproving comments
-                    if (data === false) {
-                        removeDeleteElements();
-                        showNotification(accessDeniedMessage);
-                    }
-                    else {
-                        if (data.status == "success") {
-                            // remove comment from a memory
-                            if (removeCommentFromMemory($parent.attr("comment-id"))) {
-                                $parent.slideUp(function(){
-                                    $(this).remove();
-        
-                                    // check the comments exists
-                                    if (!$("#global-comments-wrapper #comments-list-wrapper .media:first").length) {
-                                        // refresh page
-                                        removePaginator();
-                                        location.reload();
-                                    }
-                                });
+                // delete comment
+                ajaxQuery($("#comments-list-wrapper"), actionUrl, function(data) {
+                    if (data) {
+                        data = $.parseJSON(data);
+
+                        // permission denied for disapproving comments
+                        if (data === false) {
+                            removeDeleteElements();
+                            showNotification(accessDeniedMessage);
+                        }
+                        else {
+                            if (data.status == "success") {
+                                deleteComment($parent);
+                            }
+
+                            if (data.message) {
+                                showNotification(data.message);
                             }
                         }
+                    }
+                    else {
+                        removeAllActionsElements();
+                        showNotification(accessDeniedMessage);
+                    }                    
+                }, "post", "", false);
+            });
+        });
+    }
 
+    /**
+     * Delete comment
+     *
+     * @param object $comment
+     * @return void
+     */
+    var deleteComment = function($comment)
+    {
+        if (removeCommentFromMemory($comment.attr("comment-id"))) {
+            $comment.slideUp(function(){
+                $(this).remove();
+    
+                // check the comments exists
+                if (!$("#global-comments-wrapper #comments-list-wrapper .media:first").length) {
+                    // refresh page
+                    removePaginator();
+                    location.reload();
+                }
+            });
+        }
+    }
+
+    /**
+     * Init edit links
+     *
+     * @return void
+     */
+    var initEditLinks = function()
+    {
+        var $wrapper = $("#global-comments-wrapper #comments-list-wrapper");
+
+        // hide all edit links
+        $wrapper.find(".comment-actions-wrapper a.edit-comment").off().hide();
+
+        // show links only for allowed comments
+        $wrapper.find(".media-body a.edit-comment").filter(function() {
+            return allowEditComments || (allowEditOwnComments && $(this).parents(".media:first").hasClass("own-comment"));
+        }).css("display", "inline").bind("click", function(e){
+            e.preventDefault();
+
+            if ($(this).hasClass("active-edit")) {
+                // delete the edit form
+                $(this).removeClass("active-edit").
+                    parents(".media-body:first").find(".reply-link-wrapper:first .comment-reply-form-wrapper").remove();
+            }
+            else {
+                // get comment info
+                var $commentParent =  $(this).parents(".media:first");
+                var $link = $(this);
+                var commentUrl = baseUrl +
+                        "&widget_action=get_comment&widget_comment_id=" + $commentParent.attr("comment-id");
+
+                ajaxQuery($commentParent, commentUrl, function(data) {
+                    if (data) {
+                        data = $.parseJSON(data);
+
+                        // show a notification message
                         if (data.message) {
                             showNotification(data.message);
                         }
+
+                        if (data.comment) {
+                            // close a previously opened edit and reply forms
+                            $("#global-comments-wrapper #comments-list-wrapper .comment-reply-form-wrapper").remove();
+                            $("#global-comments-wrapper #comments-list-wrapper .reply-link-wrapper a").removeClass("active-reply");
+                            $("#global-comments-wrapper #comments-list-wrapper .comment-actions-wrapper a.edit-comment").removeClass("active-edit");
+
+                            // show the edit form
+                            $link.addClass("active-edit");
+                            $commentParent.find(".reply-link-wrapper:first").append(cloneReplyForm(data.comment)).html();
+                        }
                     }
-                }
-                else {
-                    removeAllActionsElements();
-                    showNotification(accessDeniedMessage);
-                }                    
-            }, "post", "", false);
+                    else {
+                        removeAllActionsElements();
+                        showNotification(accessDeniedMessage);
+                    }
+                }, "get", "", false);
+            }
         });
     }
 
@@ -293,6 +399,8 @@ function Comment()
 
         if (allowAddComments) {
             allowAddComments = false;
+
+            removeEditElements();
         }
     }
 
@@ -340,6 +448,24 @@ function Comment()
     }
 
     /**
+     * Remove edit elements
+     *
+     * @return void
+     */
+    var removeEditElements = function()
+    {
+        var $globalWrapper = $("#global-comments-wrapper");
+
+        $globalWrapper.find(".comment-actions-wrapper a.edit-comment").remove();
+        $globalWrapper.find("#comments-list-wrapper .comment-reply-form-wrapper").remove();
+
+        if (allowEditComments || allowEditOwnComments) {
+            allowEditComments = false;
+            allowEditOwnComments = false;
+        }
+    }
+
+    /**
      * Remove paginator
      *
      * @return void
@@ -371,10 +497,11 @@ function Comment()
         removeApproveElements();
         removeDisapproveElements();
         removeDeleteElements();
+        removeEditElements();
     }
 
     /**
-     * Init reply forms
+     * Init reply|edit form
      *
      * @return void
      */
@@ -382,43 +509,59 @@ function Comment()
     {
         $("#global-comments-wrapper").find("form").off().on("submit", function(e) {
             e.preventDefault();
-            var $form = this;
-            var formUrl = baseUrl + "&widget_action=add_comment";
 
-            // collect extra params
-            var replyId = $(this).parents(".media:first").attr("comment-id");
+            var $form = $(this);
+            var editMode = $form.parent(".comment-reply-form-wrapper").hasClass("edit-mode");
+            var formUrl = !editMode
+                ? baseUrl + "&widget_action=add_comment"
+                : baseUrl + "&widget_action=edit_comment";
 
-            if (typeof replyId != "undefined") {
-                formUrl += "&widget_reply_id=" + replyId;
+            var commentId = $form.parents(".media:first").attr("comment-id");
+
+            if (typeof commentId != "undefined") {
+                formUrl += "&widget_comment_id=" + commentId;
             }
 
             // send a form data
-            ajaxQuery($($form).parent(), formUrl, function(data) {
+            ajaxQuery($form.parent(), formUrl, function(data) {
                 if (data) {
                     data = $.parseJSON(data);
 
                     // permission denied for adding comments
                     if (data === false) {
-                        removeReplyElements();
+                        !editMode ? removeReplyElements() : removeEditElements();
                         showNotification(accessDeniedMessage);
                     }
                     else {
                         // add received comment
-                        if (data.comment) {
-                            addComments(data.comment, true);
+                        if (!editMode) {
+                            if (data.comment) {
+                                addComments(data.comment, true);
+                            }
+                        }
+                        else {
+                            var $comment = $("#global-comments-wrapper #comments-list-wrapper").
+                                    find(".media[comment-id='" + commentId + "']:first .comment-text:first");
+
+                            data.comment
+                                ? $comment.html(data.comment)
+                                : deleteComment($comment.parents(".media:first"));
                         }
 
+                        // show a notification message
                         if (data.message) {
                             showNotification(data.message);
                         }
 
-                        var $formParents = $($form).parents(".reply-link-wrapper" + ":first");
+                        var $formParents = $form.parents(".reply-link-wrapper:first");
 
                         // remove the reply form
-                        if ($formParents.length && data.status == "success") {
-                            $formParents.find("a").removeClass("active-reply");
-                            $formParents.find(".comment-reply-form-wrapper").remove();
+                        if ($formParents.length && data.status == "success") {                           
+                            editMode
+                                ? $form.parents(".media-body:first").find(".comment-actions-wrapper:first a.edit-comment").removeClass("active-edit")
+                                : $formParents.find("a").removeClass("active-reply");
 
+                            $formParents.find(".comment-reply-form-wrapper").remove();
                             return;
                         }
 
@@ -431,7 +574,7 @@ function Comment()
                         }
 
                         // reload the current form
-                        $($form).replaceWith($formContent);
+                        $form.replaceWith($formContent);
                         initReplyForms();
                     }
                 }
@@ -476,6 +619,20 @@ function Comment()
     }
 
     /**
+     * Init comments more
+     */
+    var initCommentsMore = function()
+    {
+        $("#global-comments-wrapper #comments-list-wrapper .media a.comment-more").off().bind("click", function(e) {
+            e.preventDefault();
+
+            // show a hidden part of comment
+            $(this).parent().find(".comment-text-hidden").show();
+            $(this).remove();
+        });
+    }
+
+    /**
      * Add comments
      *
      * @param object comments
@@ -494,7 +651,7 @@ function Comment()
                 $comment.css({"visibility" : "hidden", "height" : "1px"});
 
                 value.parent_id
-                    ? $commentsList.find(".media[comment-id='" + value.parent_id + "'] " + ".comment-replies" + ":first").prepend($comment)
+                    ? $commentsList.find(".media[comment-id='" + value.parent_id + "']:first " + ".comment-replies" + ":first").prepend($comment)
                     : $commentsList.prepend($comment);
  
                 $comment.hide().css({"visibility" : "visible", "height" : "auto"}).slideDown();
@@ -502,12 +659,14 @@ function Comment()
             }
             else {
                 value.parent_id
-                    ? $commentsList.find(".media[comment-id='" + value.parent_id + "'] " + ".comment-replies" + ":first").append($comment)
+                    ? $commentsList.find(".media[comment-id='" + value.parent_id + "']:first " + ".comment-replies" + ":first").append($comment)
                     : $commentsList.append($comment);
 
                 saveCommentInMemory(value.id, value.parent_id, "bottom");
             }
         });
+
+        initCommentsMore();
 
         // re init all  reply links
         !allowAddComments
@@ -528,6 +687,11 @@ function Comment()
         !allowDeleteComments && !allowDeleteOwnComments
             ? removeDeleteElements()
             : initDeleteLinks();
+
+        // re init all edit links
+        !allowEditComments && !allowEditOwnComments
+            ? removeEditElements()
+            : initEditLinks();
     }
 
     /**
@@ -771,6 +935,30 @@ function Comment()
     }
 
     /**
+     * Allow edit comments
+     *
+     * @param boolean allowed
+     * @return object
+     */
+    this.allowEditComments = function(allowed)
+    {
+        allowEditComments = allowed;
+        return this;
+    }
+
+    /**
+     * Allow edit own comments
+     *
+     * @param boolean allowed
+     * @return object
+     */
+    this.allowEditOwnComments = function(allowed)
+    {
+        allowEditOwnComments = allowed;
+        return this;
+    }
+
+    /**
      * Init
      *
      * @return void
@@ -778,6 +966,7 @@ function Comment()
     this.init = function()
     {
         initPaginator();
+        initCommentsMore();
 
         // init reply elements
         if (!allowAddComments) {
@@ -810,6 +999,14 @@ function Comment()
         }
         else {
             initDeleteLinks();
+        }
+
+        // init edit elements
+        if (!allowEditComments && !allowEditOwnComments || !allowAddComments) {
+            removeEditElements();
+        }
+        else {
+            initEditLinks();
         }
 
         // build comments structure in a memory

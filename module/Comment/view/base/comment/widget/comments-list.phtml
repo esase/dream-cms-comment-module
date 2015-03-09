@@ -35,7 +35,10 @@
 
 </div>
 <script type="text/javascript">
-    var comment = new Comment();
+    var comment = new Comment({
+        "confirm_yes" : "<?php echo $this->escapeJs($this->translate('Yes')) ?>",
+        "confirm_no" : "<?php echo $this->escapeJs($this->translate('No')) ?>"
+    });
 
     // init comments
     comment.setBaseUrl("<?php echo $this->escapeJs($this->base_url) ?>")
@@ -45,6 +48,8 @@
         .allowDisapproveComments(<?php echo $this->aclCheckPermission("comment_disapprove") ? 'true' : 'false' ?>)
         .allowDeleteComments(<?php echo $this->aclCheckPermission("comment_delete") ? 'true' : 'false' ?>)
         .allowDeleteOwnComments(<?php echo $this->aclCheckPermission("comment_delete_own") ? 'true' : 'false' ?>)
+        .allowEditComments(<?php echo $this->aclCheckPermission("comment_edit") ? 'true' : 'false' ?>)
+        .allowEditOwnComments(<?php echo $this->aclCheckPermission("comment_edit_own") ? 'true' : 'false' ?>)
         .init();
 </script>
 <style>
@@ -107,17 +112,25 @@
         width: 100%;
     }
 
-    div#global-comments-wrapper #comments-list-wrapper .media-body .comment{
-        
+    div#global-comments-wrapper #comments-list-wrapper .media-body .comment .comment-text{
+        margin-bottom:10px;
+    }
+
+    div#global-comments-wrapper #comments-list-wrapper .media-body .comment .comment-text .comment-text-hidden{
+        display:none;
     }
 
     div#global-comments-wrapper #comments-list-wrapper .media-body .comment-actions-wrapper {
         font-size: 12px;
         margin-bottom:10px;
-        margin-top:5px;color:#c0c0c0;
+        margin-top:5px;
+        
     }
     
-    div#global-comments-wrapper #comments-list-wrapper .media-body .comment-actions-wrapper a {
+    div#global-comments-wrapper #comments-list-wrapper .media-body .comment-actions-wrapper a.approve-comment,
+    div#global-comments-wrapper #comments-list-wrapper .media-body .comment-actions-wrapper a.disapprove-comment,
+    div#global-comments-wrapper #comments-list-wrapper .media-body .comment-actions-wrapper a.delete-comment,
+    div#global-comments-wrapper #comments-list-wrapper .media-body .comment-actions-wrapper a.edit-comment{
         margin-right:5px;
         display: none;
     }
@@ -125,5 +138,9 @@
     div#global-comments-wrapper div#comments-empty-wrapper {
         display: block;
         margin:0;
+    }
+    
+    div#global-comments-wrapper #comments-list-wrapper .media-body .comment-actions-wrapper .popover {
+        color: #333333;
     }
 </style>

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Dream CMS \"comment\" module\n"
 "POT-Creation-Date: 2013-07-19 11:59+0600\n"
-"PO-Revision-Date: 2015-02-28 18:11+0600\n"
+"PO-Revision-Date: 2015-03-09 15:48+0600\n"
 "Last-Translator: AlexE <alexermashev@gmail.com>\n"
 "Language-Team: \n"
 "Language: English\n"
@@ -14,6 +14,15 @@ msgstr ""
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Visible count of chars in comments"
+msgstr "Visible count of chars in comments"
+
+msgid "Show more ..."
+msgstr "Show more ..."
+
+msgid "Comment will be deleted, are you sure?"
+msgstr "Comment will be deleted, are you sure?"
 
 msgid "Comment on first"
 msgstr "Comment on first"
@@ -69,6 +78,15 @@ msgstr "Module allows to publish comments on the site"
 msgid "Comment"
 msgstr "Comment"
 
+msgid "Event - Editing comments"
+msgstr "Editing comments"
+
+msgid "Event - Comment edited by guest"
+msgstr "Guest edited the comment with id - \"%d\""
+
+msgid "Event - Comment edited by user"
+msgstr "\"%s\" edited the comment with id - \"%d\""
+
 msgid "Event - Deleting comments"
 msgstr "Deleting comments"
 
@@ -122,3 +140,9 @@ msgstr "Deleting comments"
 
 msgid "ACL - Deleting own comments"
 msgstr "Deleting own comments"
+
+msgid "ACL - Editing comments"
+msgstr "Editing comments"
+
+msgid "ACL - Editing own comments"
+msgstr "Editing own comments"
