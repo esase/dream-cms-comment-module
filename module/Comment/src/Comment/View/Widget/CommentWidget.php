@@ -417,6 +417,7 @@ class CommentWidget extends PageAbstractWidget
         // 14. Show only small part of comment if it long +
         // 17. Messages stay innactive when you edit message and they become active +
 
+        //17. Allow all delete and edit own comments
         //11. Send reply on email ???
         //15 . Edit doesnt work if add comments disallowed
         // 16. Mark as a SPAM ???
