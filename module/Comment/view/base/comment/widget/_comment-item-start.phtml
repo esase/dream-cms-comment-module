@@ -1,3 +1,6 @@
+<?php $this->declareVars('userPage') ?>
+<?php $this->userPage = $this->pageUrl('user', [], null, true) ?>
+
 <div class="media<?php if (!$this->approved): ?> disapproved<?php else: ?> approved<?php endif ?><?php if ($this->own_comment): ?> own-comment<?php endif ?>" comment-id="<?php echo (int) $this->id ?>" comment-parent="<?php echo (int) $this->parent_id ?>">
     <a name="comment-<?php echo (int) $this->id ?>"></a>
     <div class="media-left">
@@ -7,7 +10,24 @@
     </div>
     <div class="media-body">
         <div class="owner">
-            <a href="#">eSASe</a> 14.04.84
+            <?php if ($this->guest_name): ?>
+                <?php echo $this->escapeHtml($this->guest_name) ?>
+            <?php else: ?>
+ 
+                <?php if ($this->nick_name): ?>
+                    <?php if (false !== $this->userPage): ?>
+                        <a href="<?php echo $this->url('page', ['page_name' => $this->userPage, 'slug' => $this->user_slug], ['force_canonical' => true]) ?>">
+                            <?php echo $this->escapeHtml($this->nick_name) ?>
+                        </a>
+                    <?php else: ?>
+                        <?php echo $this->escapeHtml($this->nick_name) ?>
+                    <?php endif ?>
+                <?php else: ?>
+                    <?php echo $this->translate('Guest') ?>
+                <?php endif ?>
+ 
+            <?php endif ?>
+            14.04.84
         </div>
         <div class="comment">
             <div class="comment-actions-wrapper">

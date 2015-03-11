@@ -519,7 +519,7 @@ class CommentWidget extends PageAbstractWidget
     {
         // get comments
         $commentsList = $this->getModel()->getComments($allowApprove, $this->pageId,
-                $this->getPageSlug(), (int) $this->getWidgetSetting('comment_per_page'), $getTree, $lastRightKey, $ownReplies);
+                (int) $this->getWidgetSetting('comment_per_page'), $this->getPageSlug(), $getTree, $lastRightKey, $ownReplies);
 
         // process comments
         if (null != ($commentsList = $this->processComments($commentsList, $asArray))) {
@@ -553,7 +553,11 @@ class CommentWidget extends PageAbstractWidget
                     'comment' => $comment['comment'],
                     'approved' => $comment['active'] == CommentNestedSet::COMMENT_STATUS_ACTIVE,
                     'own_comment' => $userId == $comment['user_id'] || $userId == $comment['guest_id'],
-                    'visible_chars' => (int) $this->getWidgetSetting('comment_visible_chars')
+                    'visible_chars' => (int) $this->getWidgetSetting('comment_visible_chars'),
+                    'nick_name' => $comment['registred_nickname'],
+                    'guest_name' => $comment['name'],
+                    'user_id' => $comment['user_id'],
+                    'user_slug' => $comment['registred_slug']
                 ]);
 
                 // check for children

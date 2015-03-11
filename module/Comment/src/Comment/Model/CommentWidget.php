@@ -49,39 +49,50 @@ class CommentWidget extends CommentBase
      *
      * @param boolean $allowApprove
      * @param integer $pageId
-     * @param string $pageSlug
      * @param integer $limit
+     * @param string $pageSlug     
      * @param boolean $getTree
      * @param integer $lastRightKey
      * @return array
      */
-    public function getComments($allowApprove, $pageId, $pageSlug = null, $limit, $getTree = true, $lastRightKey = null)
+    public function getComments($allowApprove, $pageId, $limit, $pageSlug = null, $getTree = true, $lastRightKey = null)
     {
         $select = $this->select();
-        $select->from('comment_list')
+        $select->from(['a' => 'comment_list'])
             ->columns([
                 'id',
                 'comment',
                 'parent_id',
                 'active',
                 'user_id',
-                'guest_id'
+                'guest_id',
+                'name'
             ])
+            ->join(
+                ['b' => 'user_list'],
+                'a.user_id = b.user_id',
+                [
+                    'registred_nickname' => 'nick_name',
+                    'registred_slug' => 'slug'
+                ],
+                'left'
+            )
             ->where([
-                'page_id' => $pageId,
-                'slug' => $pageSlug
+                'a.page_id' => $pageId,
+                'a.slug' => $pageSlug
             ])
             ->limit($limit)
-            ->order($this->getCommentModel()->getRightKey() . ' desc');
+            ->order('a.' . $this->getCommentModel()->getRightKey() . ' desc');
 
         if (!$allowApprove) {
             $select->where([
-                'hidden' => CommentNestedSet::COMMENT_STATUS_NOT_HIDDEN
+                'a.hidden' => CommentNestedSet::COMMENT_STATUS_NOT_HIDDEN
             ]);
         }
 
         if ($lastRightKey) {
-            $select->where->lessThan($this->getCommentModel()->getRightKey(), $lastRightKey);
+            $select->where->
+                lessThan('a.' . $this->getCommentModel()->getRightKey(), $lastRightKey);
         }
 
         $statement = $this->prepareStatementForSqlObject($select);

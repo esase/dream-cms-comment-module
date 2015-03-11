@@ -231,6 +231,7 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
                 'b.user_id = ' . $this->tableGateway->table . '.user_id', 
                 [
                     'registred_nickname' => 'nick_name',
+                    'registred_slug' => 'slug',
                     'registred_email' => 'email'
                 ],
                 'left'
