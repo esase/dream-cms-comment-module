@@ -557,7 +557,8 @@ class CommentWidget extends PageAbstractWidget
                     'nick_name' => $comment['registred_nickname'],
                     'guest_name' => $comment['name'],
                     'user_id' => $comment['user_id'],
-                    'user_slug' => $comment['registred_slug']
+                    'user_slug' => $comment['registred_slug'],
+                    'user_avatar' => $comment['registred_avatar']
                 ]);
 
                 // check for children

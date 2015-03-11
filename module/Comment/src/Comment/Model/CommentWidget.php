@@ -73,7 +73,8 @@ class CommentWidget extends CommentBase
                 'a.user_id = b.user_id',
                 [
                     'registred_nickname' => 'nick_name',
-                    'registred_slug' => 'slug'
+                    'registred_slug' => 'slug',
+                    'registred_avatar' => 'avatar'
                 ],
                 'left'
             )

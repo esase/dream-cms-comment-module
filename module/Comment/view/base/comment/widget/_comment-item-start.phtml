@@ -1,33 +1,40 @@
-<?php $this->declareVars('userPage') ?>
-<?php $this->userPage = $this->pageUrl('user', [], null, true) ?>
+<?php $this->declareVars('userPage', 'commenterName', 'commenterUrl') ?>
+
+<?php 
+    $this->userPage = $this->pageUrl('user', [], null, true);
+
+    $this->commenterName = $this->guest_name
+        ? $this->guest_name
+        : ($this->nick_name ? $this->nick_name : $this->translate('Guest'));
+
+    $this->commenterUrl = $this->user_id && false !== $this->userPage
+        ? $this->url('page', ['page_name' => $this->userPage, 'slug' => $this->user_slug], ['force_canonical' => true])
+        : null;
+?>
 
 <div class="media<?php if (!$this->approved): ?> disapproved<?php else: ?> approved<?php endif ?><?php if ($this->own_comment): ?> own-comment<?php endif ?>" comment-id="<?php echo (int) $this->id ?>" comment-parent="<?php echo (int) $this->parent_id ?>">
     <a name="comment-<?php echo (int) $this->id ?>"></a>
     <div class="media-left">
-        <a href="#">
-            <img alt="64x64" data-src="holder.js/64x64" class="media-object" style="width: 64px; height: 64px;" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9InllcyI/PjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+PGRlZnMvPjxyZWN0IHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgZmlsbD0iI0VFRUVFRSIvPjxnPjx0ZXh0IHg9IjE0LjUiIHk9IjMyIiBzdHlsZT0iZmlsbDojQUFBQUFBO2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1mYW1pbHk6QXJpYWwsIEhlbHZldGljYSwgT3BlbiBTYW5zLCBzYW5zLXNlcmlmLCBtb25vc3BhY2U7Zm9udC1zaXplOjEwcHQ7ZG9taW5hbnQtYmFzZWxpbmU6Y2VudHJhbCI+NjR4NjQ8L3RleHQ+PC9nPjwvc3ZnPg==" data-holder-rendered="true">
-        </a>
+        <?php if ($this->commenterUrl): ?>
+            <a href="<?php echo $this->commenterUrl ?>" class="thumbnail">
+                <img alt="<?php echo $this->escapeHtmlAttr($this->commenterName) ?>" class="media-object" src="<?php echo $this->userAvatarUrl($this->user_avatar) ?>" />
+            </a>
+        <?php else: ?>
+            <div class="thumbnail">
+                <img alt="<?php echo $this->escapeHtmlAttr($this->commenterName) ?>" class="media-object" src="<?php echo $this->userAvatarUrl($this->user_avatar) ?>" />
+            </div>
+        <?php endif ?>
     </div>
     <div class="media-body">
         <div class="owner">
-            <?php if ($this->guest_name): ?>
-                <?php echo $this->escapeHtml($this->guest_name) ?>
+            <?php if ($this->commenterUrl): ?>
+                <a href="<?php echo $this->commenterUrl ?>">
+                    <?php echo $this->escapeHtml($this->commenterName) ?>
+                </a>
             <?php else: ?>
- 
-                <?php if ($this->nick_name): ?>
-                    <?php if (false !== $this->userPage): ?>
-                        <a href="<?php echo $this->url('page', ['page_name' => $this->userPage, 'slug' => $this->user_slug], ['force_canonical' => true]) ?>">
-                            <?php echo $this->escapeHtml($this->nick_name) ?>
-                        </a>
-                    <?php else: ?>
-                        <?php echo $this->escapeHtml($this->nick_name) ?>
-                    <?php endif ?>
-                <?php else: ?>
-                    <?php echo $this->translate('Guest') ?>
-                <?php endif ?>
- 
+                <?php echo $this->escapeHtml($this->commenterName) ?>
             <?php endif ?>
-            14.04.84
+             14.04.84
         </div>
         <div class="comment">
             <div class="comment-actions-wrapper">

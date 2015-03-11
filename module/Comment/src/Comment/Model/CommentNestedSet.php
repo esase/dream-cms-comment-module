@@ -232,7 +232,8 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
                 [
                     'registred_nickname' => 'nick_name',
                     'registred_slug' => 'slug',
-                    'registred_email' => 'email'
+                    'registred_email' => 'email',
+                    'registred_avatar' => 'avatar'
                 ],
                 'left'
             )->where([
