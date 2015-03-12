@@ -540,12 +540,21 @@ function Comment(translationsList)
                             }
                         }
                         else {
-                            var $comment = $("#global-comments-wrapper #comments-list-wrapper").
-                                    find(".media[comment-id='" + commentId + "']:first .comment-text:first");
-
-                            data.comment
-                                ? $comment.html(data.comment)
-                                : deleteComment($comment.parents(".media:first"));
+                            // edit mode
+                            var $commentWrapper = $("#global-comments-wrapper #comments-list-wrapper").find(".media[comment-id='" + commentId + "']:first");
+ 
+                            if (data.comment) {
+                                // replace edited comment
+                                $commentWrapper.find(".comment-text:first").html(data.comment);
+ 
+                                // replace guest name
+                                if (data.guest_name) {
+                                    $commentWrapper.find(".comment-guest-name:first").text(data.guest_name);
+                                }
+                            }
+                            else {
+                                deleteComment($commentWrapper);
+                            }
                         }
 
                         // show a notification message

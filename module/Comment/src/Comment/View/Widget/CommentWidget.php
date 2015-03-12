@@ -379,6 +379,7 @@ class CommentWidget extends PageAbstractWidget
             }
 
             return [
+                'guest_name' => empty($commentInfo['user_id']) ? $commentInfo['name'] : null,
                 'comment' => $commentInfo && ($allowApprove || $commentInfo['active'] == CommentNestedSet::COMMENT_STATUS_ACTIVE)
                     ? $commentInfo['comment']
                     : '',

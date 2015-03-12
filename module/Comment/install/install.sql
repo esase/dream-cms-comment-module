@@ -16,9 +16,7 @@ INSERT INTO `acl_resource` (`resource`, `description`, `module`) VALUES
 ('comment_approve', 'ACL - Approving comments', @moduleId),
 ('comment_disapprove', 'ACL - Disapproving comments', @moduleId),
 ('comment_delete', 'ACL - Deleting comments', @moduleId),
-('comment_delete_own', 'ACL - Deleting own comments', @moduleId),
-('comment_edit', 'ACL - Editing comments', @moduleId),
-('comment_edit_own', 'ACL - Editing own comments', @moduleId);
+('comment_edit', 'ACL - Editing comments', @moduleId);
 
 INSERT INTO `acl_resource` (`resource`, `description`, `module`) VALUES
 ('comment_add', 'ACL - Adding comments', @moduleId);
@@ -27,6 +25,22 @@ SET @addCommentResourceId = (SELECT LAST_INSERT_ID());
 INSERT INTO `acl_resource_connection` (`role`, `resource`) VALUES
 (3, @addCommentResourceId),
 (2, @addCommentResourceId);
+
+INSERT INTO `acl_resource` (`resource`, `description`, `module`) VALUES
+('comment_edit_own', 'ACL - Editing own comments', @moduleId);
+SET @editCommentResourceId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `acl_resource_connection` (`role`, `resource`) VALUES
+(3, @editCommentResourceId),
+(2, @editCommentResourceId);
+
+INSERT INTO `acl_resource` (`resource`, `description`, `module`) VALUES
+('comment_delete_own', 'ACL - Deleting own comments', @moduleId);
+SET @deleteCommentResourceId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `acl_resource_connection` (`role`, `resource`) VALUES
+(3, @deleteCommentResourceId),
+(2, @deleteCommentResourceId);
 
 -- application events
 
