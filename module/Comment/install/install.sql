@@ -91,6 +91,29 @@ INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALU
 (@settingId, '<p><b>__PosterName__ (__PosterEmail__):</b></p><p><a href="__CommentUrl__#comment-__CommentId__">__Comment__</a></p><p>__Date__</p>', NULL),
 (@settingId, '<p><b>__PosterName__ (__PosterEmail__):</b></p><p><a href="__CommentUrl__#comment-__CommentId__">__Comment__</a></p><p>__Date__</p>', 'ru');
 
+INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
+('comment_reply_send', 'Send notifications about new replies', NULL, 'checkbox', NULL, 4, @settingsCategoryId, @moduleId, NULL, NULL, NULL, NULL);
+SET @settingId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
+(@settingId, '1', NULL);
+
+INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
+('comment_reply_title', 'Comment reply title', 'A comment reply notification', 'notification_title', 1, 5, @settingsCategoryId, @moduleId, 1, NULL, NULL, NULL);
+SET @settingId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
+(@settingId, 'You have a new reply', NULL),
+(@settingId, 'У вас есть новый ответ', 'ru');
+
+INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
+('comment_reply_message', 'Comment reply message', NULL, 'notification_message', 1, 6, @settingsCategoryId, @moduleId, 1, NULL, NULL, NULL);
+SET @settingId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
+(@settingId, '<p><b>__PosterName__ (__PosterEmail__) replied to you:</b></p><p><q>__Comment__</q></p><p><a href="__ReplyUrl__#comment-__ReplyId__">__Reply__</a></p><p>__Date__</p>', NULL),
+(@settingId, '<p><b>__PosterName__ (__PosterEmail__) ответил(а) вам:</b></p><p><q>__Comment__</q></p><p><a href="__ReplyUrl__#comment-__ReplyId__">__Reply__</a></p><p>__Date__</p>', 'ru');
+
 -- system pages and widgets
 
 INSERT INTO `page_widget` (`name`, `module`, `type`, `description`, `duplicate`, `forced_visibility`, `depend_page_id`) VALUES

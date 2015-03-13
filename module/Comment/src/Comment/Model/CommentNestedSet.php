@@ -233,7 +233,8 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
                     'registred_nickname' => 'nick_name',
                     'registred_slug' => 'slug',
                     'registred_email' => 'email',
-                    'registred_avatar' => 'avatar'
+                    'registred_avatar' => 'avatar',
+                    'registred_language' => 'language'
                 ],
                 'left'
             )->where([
@@ -316,7 +317,7 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
             $commentInfo = $this->getCommentInfo($commentId,  $pageId, $slug);
 
             // fire the add comment event
-            CommentEvent::fireAddCommentEvent($pageUrl, $commentInfo);
+            CommentEvent::fireAddCommentEvent($pageUrl, $commentInfo, $replyComment);
             return $commentInfo;
         }
 
