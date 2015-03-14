@@ -88,33 +88,6 @@ function Comment(translationsList)
     }
 
     /**
-     * Clone reply form
-     *
-     * @apram object comment
-     * @return object
-     */
-    var cloneReplyForm = function(comment)
-    {
-        var $replyForm = $("#global-comments-wrapper > .comment-reply-form-wrapper").clone(true);
-
-        // remove all erros and unset entered values
-        $replyForm.find("ul").remove();
-        $replyForm.find(".primary-data").val("");
-        $replyForm.find(".alert").remove();
-
-        if (comment) {
-            $replyForm.addClass("edit-mode");
-
-            // fill the form with values
-            $.each(comment, function(index, value) {
-                $replyForm.find(":input[name='" + index + "']").val(value);
-            });
-        }
-
-        return $replyForm;
-    }
-
-    /**
      * Init reply links
      *
      * @return void
@@ -130,12 +103,27 @@ function Comment(translationsList)
                 $(this).removeClass("active-reply").parents(".reply-link-wrapper:first").find(".comment-reply-form-wrapper").remove();
             }
             else {
-                // close a previously opened reply form
-                $("#global-comments-wrapper #comments-list-wrapper .comment-reply-form-wrapper").remove();
-                $("#global-comments-wrapper #comments-list-wrapper .reply-link-wrapper a").removeClass("active-reply");
-                $("#global-comments-wrapper #comments-list-wrapper .comment-actions-wrapper a.edit-comment").removeClass("active-edit");
+                var commentFormUrl = baseUrl + "&widget_action=get_form";
+                var $link = $(this);
 
-                $(this).addClass("active-reply").parents(".reply-link-wrapper:first").append(cloneReplyForm()).html();
+                // get comment reply form
+                ajaxQuery($(this).parents("#comments-list-wrapper"), commentFormUrl, function(data) {
+                    if (data) {
+                        data = $.parseJSON(data);
+                        
+                        // close a previously opened reply form
+                        $("#global-comments-wrapper #comments-list-wrapper .comment-reply-form-wrapper").remove();
+                        $("#global-comments-wrapper #comments-list-wrapper .reply-link-wrapper a").removeClass("active-reply");
+                        $("#global-comments-wrapper #comments-list-wrapper .comment-actions-wrapper a.edit-comment").removeClass("active-edit");
+
+                        $link.addClass("active-reply").parents(".reply-link-wrapper:first").append(data.form);
+                        initReplyForms();
+                    }
+                    else {
+                        removeAllActionsElements();
+                        showNotification(accessDeniedMessage);
+                    }
+                }, "get", "", false);
             }
         });
     }
@@ -163,7 +151,7 @@ function Comment(translationsList)
             var $link = $(this);
 
             // approve comment
-            ajaxQuery($("#comments-list-wrapper"), actionUrl, function(data) {
+            ajaxQuery($("#global-comments-wrapper #comments-list-wrapper"), actionUrl, function(data) {
                 if (data) {
                     data = $.parseJSON(data);
 
@@ -219,7 +207,7 @@ function Comment(translationsList)
             var $link = $(this);
 
             // disapprove comment
-            ajaxQuery($("#comments-list-wrapper"), actionUrl, function(data) {
+            ajaxQuery($("#global-comments-wrapper #comments-list-wrapper"), actionUrl, function(data) {
                 if (data) {
                     data = $.parseJSON(data);
 
@@ -277,7 +265,7 @@ function Comment(translationsList)
                 var actionUrl = baseUrl + "&widget_action=delete_comment&widget_comment_id=" + $parent.attr("comment-id");
 
                 // delete comment
-                ajaxQuery($("#comments-list-wrapper"), actionUrl, function(data) {
+                ajaxQuery($("#global-comments-wrapper #comments-list-wrapper"), actionUrl, function(data) {
                     if (data) {
                         data = $.parseJSON(data);
 
@@ -351,13 +339,13 @@ function Comment(translationsList)
                     parents(".media-body:first").find(".reply-link-wrapper:first .comment-reply-form-wrapper").remove();
             }
             else {
-                // get comment info
                 var $commentParent =  $(this).parents(".media:first");
                 var $link = $(this);
-                var commentUrl = baseUrl +
-                        "&widget_action=get_comment&widget_comment_id=" + $commentParent.attr("comment-id");
+                var commentFormUrl = baseUrl +
+                        "&widget_action=get_form&widget_comment_id=" + $commentParent.attr("comment-id");
 
-                ajaxQuery($commentParent, commentUrl, function(data) {
+                // get comment form
+                ajaxQuery($("#global-comments-wrapper #comments-list-wrapper"), commentFormUrl, function(data) {
                     if (data) {
                         data = $.parseJSON(data);
 
@@ -366,7 +354,7 @@ function Comment(translationsList)
                             showNotification(data.message);
                         }
 
-                        if (data.comment) {
+                        if (data.form) {
                             // close a previously opened edit and reply forms
                             $("#global-comments-wrapper #comments-list-wrapper .comment-reply-form-wrapper").remove();
                             $("#global-comments-wrapper #comments-list-wrapper .reply-link-wrapper a").removeClass("active-reply");
@@ -374,7 +362,11 @@ function Comment(translationsList)
 
                             // show the edit form
                             $link.addClass("active-edit");
-                            $commentParent.find(".reply-link-wrapper:first").append(cloneReplyForm(data.comment)).html();
+                            var $formWrapper = $(data.form);
+                            $formWrapper.find("form:first").addClass("edit-mode");
+
+                            $commentParent.find(".reply-link-wrapper:first").append($formWrapper);
+                            initReplyForms();
                         }
                     }
                     else {
@@ -395,12 +387,10 @@ function Comment(translationsList)
     {
         var $globalWrapper = $("#global-comments-wrapper");
         $globalWrapper.find(".comment-reply-form-wrapper").remove();
-        $globalWrapper.find(".reply-link-wrapper").remove();
+        $globalWrapper.find(".reply-link-wrapper .reply-comment").remove();
 
         if (allowAddComments) {
             allowAddComments = false;
-
-            removeEditElements();
         }
     }
 
@@ -511,11 +501,8 @@ function Comment(translationsList)
             e.preventDefault();
 
             var $form = $(this);
-            var editMode = $form.parent(".comment-reply-form-wrapper").hasClass("edit-mode");
-            var formUrl = !editMode
-                ? baseUrl + "&widget_action=add_comment"
-                : baseUrl + "&widget_action=edit_comment";
-
+            var editMode = $form.hasClass("edit-mode");
+            var formUrl = !editMode ? baseUrl + "&widget_action=add_comment" : baseUrl + "&widget_action=edit_comment";
             var commentId = $form.parents(".media:first").attr("comment-id");
 
             if (typeof commentId != "undefined") {
@@ -523,7 +510,7 @@ function Comment(translationsList)
             }
 
             // send a form data
-            ajaxQuery($form.parent(), formUrl, function(data) {
+            ajaxQuery($("#global-comments-wrapper #comments-list-wrapper"), formUrl, function(data) {
                 if (data) {
                     data = $.parseJSON(data);
 
@@ -547,7 +534,7 @@ function Comment(translationsList)
                                 // replace edited comment
                                 $commentWrapper.find(".comment-text:first").html(data.comment);
  
-                                // replace guest name
+                                // replace a guest name
                                 if (data.guest_name) {
                                     $commentWrapper.find(".comment-guest-name:first").text(data.guest_name);
                                 }
@@ -582,8 +569,12 @@ function Comment(translationsList)
                             $formContent.find(".primary-data").val("");
                         }
 
+                        if (editMode) {
+                            $formContent.find("form").addClass("edit-mode");
+                        }
+
                         // reload the current form
-                        $form.replaceWith($formContent);
+                        $form.parent().replaceWith($formContent);
                         initReplyForms();
                     }
                 }
@@ -1011,7 +1002,7 @@ function Comment(translationsList)
         }
 
         // init edit elements
-        if (!allowEditComments && !allowEditOwnComments || !allowAddComments) {
+        if (!allowEditComments && !allowEditOwnComments) {
             removeEditElements();
         }
         else {

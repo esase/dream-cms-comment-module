@@ -41,42 +41,6 @@ class CommentWidget extends PageAbstractWidget
     }
 
     /**
-     * Get comment
-     *
-     * @param boolean $allowApprove
-     * @param integer $commentId
-     * @return array
-     */
-    protected function getComment($allowApprove, $commentId)
-    {
-        $comment = null;
-        $message = $this->translate('Error occured, please try again later');
-
-        if (null != ($commentInfo = $this->getModel()->
-                getCommentModel()->getCommentInfo($commentId, $this->pageId, $this->getPageSlug()))) {
-
-            $allowView = $allowApprove || ($commentInfo['active'] ==
-                    CommentNestedSet::COMMENT_STATUS_ACTIVE && $commentInfo['hidden'] == CommentNestedSet::COMMENT_STATUS_NOT_HIDDEN);
-            
-
-            if ($allowView) {
-                $comment = [
-                    'comment' => $commentInfo['comment'],
-                    'name' => $commentInfo['name'],
-                    'email' => $commentInfo['email'],
-                ];
-
-                $message = null;
-            }
-        }
-
-        return [
-            'comment' => $comment,
-            'message' => $message
-        ];
-    }
-
-    /**
      * Disapprove comment
      *
      * @apram integer $commentId
@@ -201,10 +165,9 @@ class CommentWidget extends PageAbstractWidget
      * Get add comment form
      *
      * @param boolean $allowApprove
-     * @param boolean $validate
      * @return array|boolean
      */
-    protected function getAddCommentForm($allowApprove, $validate = false)
+    protected function getAddCommentForm($allowApprove)
     {
         if (AclService::checkPermission('comment_add', false)) {
             // get comment form settings
@@ -216,66 +179,59 @@ class CommentWidget extends PageAbstractWidget
             $commentInfo    = '';
 
             // get comment form
-            $commentForm = $this->getServiceLocator()
-                ->get('Application\Form\FormManager')
-                ->getInstance('Comment\Form\Comment')
-                ->enableCaptcha($captchaEnabled)
-                ->setGuestMode(UserIdentityService::isGuest());
+            $commentForm = $this->initCommentForm($captchaEnabled, $allowApprove);
 
             // validate the form
-            if ($validate) {
-                // fill form with received values
-                $commentForm->getForm()->setData($this->getRequest()->getPost());
+            $commentForm->getForm()->setData($this->getRequest()->getPost());
 
-                // add a new comment
-                if ($commentForm->getForm()->isValid()) {
-                    $replyId  = $this->getRequest()->getQuery('widget_comment_id', null);
+            // add a new comment
+            if ($commentForm->getForm()->isValid()) {
+                $replyId  = $this->getRequest()->getQuery('widget_comment_id', null);
 
-                    // get current page url
-                    $pageUrl = $this->getView()->url('page', ['page_name' =>
-                            $this->getView()->pageUrl(PageService::getCurrentPage()['slug']), 'slug' => $this->getPageSlug()], ['force_canonical' => true]);
+                // get current page url
+                $pageUrl = $this->getView()->url('page', ['page_name' =>
+                        $this->getView()->pageUrl(PageService::getCurrentPage()['slug']), 'slug' => $this->getPageSlug()], ['force_canonical' => true]);
 
-                    $formData = $commentForm->getForm()->getData();
+                $formData = $commentForm->getForm()->getData();
 
-                    // get comment's status
-                    $commentActive = $allowApprove || (int) $this->getSetting('comments_auto_approve');
+                // get comment's status
+                $commentActive = $allowApprove || (int) $this->getSetting('comments_auto_approve');
 
-                    // collect basic data
-                    $basicData = [
-                        'active' => $commentActive ? CommentNestedSet::COMMENT_STATUS_ACTIVE : CommentNestedSet::COMMENT_STATUS_NOT_ACTIVE,
-                        'comment' => $formData['comment'],
-                        'name' => !empty($formData['name']) ? $formData['name'] : null,
-                        'email' => !empty($formData['email']) ? $formData['email'] : null,
-                        'user_id' => !UserIdentityService::isGuest()
-                            ? UserIdentityService::getCurrentUserIdentity()['user_id']
-                            : null
-                    ];
+                // collect basic data
+                $basicData = [
+                    'active' => $commentActive ? CommentNestedSet::COMMENT_STATUS_ACTIVE : CommentNestedSet::COMMENT_STATUS_NOT_ACTIVE,
+                    'comment' => $formData['comment'],
+                    'name' => !empty($formData['name']) ? $formData['name'] : null,
+                    'email' => !empty($formData['email']) ? $formData['email'] : null,
+                    'user_id' => !UserIdentityService::isGuest()
+                        ? UserIdentityService::getCurrentUserIdentity()['user_id']
+                        : null
+                ];
 
-                    $commentInfo = $this->getModel()->
-                            getCommentModel()->addComment($pageUrl, $basicData, $this->pageId, $this->getPageSlug(), $replyId);
+                $commentInfo = $this->getModel()->
+                        getCommentModel()->addComment($pageUrl, $basicData, $this->pageId, $this->getPageSlug(), $replyId);
 
-                    // return a status
-                    if (is_array($commentInfo)) {
-                        $commentStatus = 'success';
+                // return a status
+                if (is_array($commentInfo)) {
+                    $commentStatus = 'success';
 
-                        if ($commentInfo['active'] != CommentNestedSet::COMMENT_STATUS_ACTIVE) {
-                            $commentMessage = $this->translate('Your comment will be available after approving');
-                        }
-
-                        // increase ACL track
-                        AclService::checkPermission('comment_add');
+                    if ($commentInfo['active'] != CommentNestedSet::COMMENT_STATUS_ACTIVE) {
+                        $commentMessage = $this->translate('Your comment will be available after approving');
                     }
-                    else {
-                        $commentStatus = 'error';
-                        $commentMessage = $this->translate('Error occured, please try again later');
-                    }
+
+                    // increase ACL track
+                    AclService::checkPermission('comment_add');
+                }
+                else {
+                    $commentStatus = 'error';
+                    $commentMessage = $this->translate('Error occured, please try again later');
                 }
             }
 
             return [
-                'comment' => $commentInfo && $commentInfo['active'] == CommentNestedSet::COMMENT_STATUS_ACTIVE
-                    ? $this->processComments([$commentInfo], true)
-                    : '',
+                'comment' => $commentInfo && $commentInfo['active']
+                        == CommentNestedSet::COMMENT_STATUS_ACTIVE ? $this->processComments([$commentInfo], true) : '',
+
                 'status'  => $commentStatus,
                 'message' => $commentMessage,
                 'form' => $this->getView()->partial('comment/widget/_comment-form', [
@@ -311,11 +267,7 @@ class CommentWidget extends PageAbstractWidget
             $commentInfo    = '';
 
             // get comment form
-            $commentForm = $this->getServiceLocator()
-                ->get('Application\Form\FormManager')
-                ->getInstance('Comment\Form\Comment')
-                ->enableCaptcha($captchaEnabled)
-                ->setGuestMode(UserIdentityService::isGuest());
+            $commentForm = $this->initCommentForm($captchaEnabled, $allowApprove);
 
             // fill form with received values
             $commentForm->getForm()->setData($this->getRequest()->getPost());
@@ -380,9 +332,9 @@ class CommentWidget extends PageAbstractWidget
 
             return [
                 'guest_name' => empty($commentInfo['user_id']) ? $commentInfo['name'] : null,
-                'comment' => $commentInfo && ($allowApprove || $commentInfo['active'] == CommentNestedSet::COMMENT_STATUS_ACTIVE)
-                    ? $commentInfo['comment']
-                    : '',
+                'comment' => $commentInfo && ($allowApprove
+                        || $commentInfo['active'] == CommentNestedSet::COMMENT_STATUS_ACTIVE) ? $commentInfo['comment'] : '',
+
                 'status'  => $commentStatus,
                 'message' => $commentMessage,
                 'form' => $this->getView()->partial('comment/widget/_comment-form', [
@@ -394,6 +346,71 @@ class CommentWidget extends PageAbstractWidget
         }
 
         return false;
+    }
+
+    /**
+     * Init comment form
+     *
+     * @param boolean $captchaEnabled
+     * @param boolean $allowApprove
+     * @param integer $commentId
+     * @return boolean|object Comment\Form\Comment
+     */
+    protected function initCommentForm($captchaEnabled, $allowApprove, $commentId = null)
+    {
+        // get comment form
+        $commentForm = $this->getServiceLocator()
+            ->get('Application\Form\FormManager')
+            ->getInstance('Comment\Form\Comment')
+            ->enableCaptcha($captchaEnabled)
+            ->setGuestMode(UserIdentityService::isGuest());
+
+        // get a comment info
+        if ($commentId) {
+            $commentInfo = $this->getModel()->
+                    getCommentModel()->getCommentInfo($commentId, $this->pageId, $this->getPageSlug());
+
+            if (!$commentInfo || (!$allowApprove && ($commentInfo['active'] !=
+                    CommentNestedSet::COMMENT_STATUS_ACTIVE || $commentInfo['hidden'] != CommentNestedSet::COMMENT_STATUS_NOT_HIDDEN))) {
+
+                return false;
+            }
+
+            // fill form with default values
+            $commentForm->getForm()->setData($commentInfo);
+        }
+
+        return $commentForm;
+    }
+
+    /**
+     * Get comment form
+     *
+     * @param boolean $allowApprove
+     * @param integer $commentId
+     * @return array
+     */
+    protected function getCommentForm($allowApprove = false, $commentId = null)
+    {
+        $captchaEnabled = (int) $this->
+                getWidgetSetting('comment_form_captcha') && UserIdentityService::isGuest();
+
+        // init a form
+        if (false !== ($form = $this->
+                initCommentForm($captchaEnabled, $allowApprove, $commentId))) {
+
+            return [
+                'form' => $this->getView()->partial('comment/widget/_comment-form', [
+                    'enable_captcha' => $captchaEnabled,
+                    'guest_mode' => UserIdentityService::isGuest(),
+                    'comment_form' => $form->getForm()
+                ])
+            ];
+        }
+
+        return [
+            'message' => $this->translate('Error occured, please try again later')
+        ];
     }
 
     /**
@@ -417,10 +434,10 @@ class CommentWidget extends PageAbstractWidget
         // 9. Edit comments +
         // 14. Show only small part of comment if it long +
         // 17. Messages stay innactive when you edit message and they become active +
-
-        //17. Allow all delete and edit own comments
-        //11. Send reply on email ???
-        //15 . Edit doesnt work if add comments disallowed
+        //17. Allow all delete and edit own comments+
+        //11. Send reply on email+
+        //15 . Edit doesnt work if add comments disallowed +
+        
         // 16. Mark as a SPAM ???
         if (AclService::checkPermission('comment_view', false)) {
             // is approve allowing
@@ -452,13 +469,13 @@ class CommentWidget extends PageAbstractWidget
                     case 'add_comment'  :
                         // validate and add a new comment
                         if ($this->getRequest()->isPost()) {
-                            return $this->getView()->json($this->getAddCommentForm($allowApprove, true));
+                            return $this->getView()->json($this->getAddCommentForm($allowApprove));
                         }
                         break;
 
-                    case 'get_comment'  :
+                    case 'get_form'  :
                         return $this->getView()->
-                                json($this->getComment($allowApprove, $this->getRequest()->getQuery('widget_comment_id', -1)));
+                                json($this->getCommentForm($allowApprove, $this->getRequest()->getQuery('widget_comment_id', null)));
 
                     case 'edit_comment'  :
                         // validate and edit the comment
@@ -491,12 +508,9 @@ class CommentWidget extends PageAbstractWidget
                 }
             }
 
-            // get a comment form
-            $commentForm = $this->getAddCommentForm($allowApprove);
-
             return $this->getView()->partial('comment/widget/comments-list', [
                 'base_url' => $this->getWidgetConnectionUrl(),
-                'comment_form' => false !== $commentForm ? $commentForm['form'] : null,
+                'comment_form' => AclService::checkPermission('comment_add', false) ? $this->getCommentForm()['form'] : null,
                 'comments' => $this->getCommentsList($allowApprove),
                 'show_paginator' => $this->getModel()->getCommentsCount($allowApprove,
                         $this->pageId, $this->getPageSlug()) > (int) $this->getWidgetSetting('comment_per_page')
@@ -559,7 +573,8 @@ class CommentWidget extends PageAbstractWidget
                     'guest_name' => $comment['name'],
                     'user_id' => $comment['user_id'],
                     'user_slug' => $comment['registred_slug'],
-                    'user_avatar' => $comment['registred_avatar']
+                    'user_avatar' => $comment['registred_avatar'],
+                    'created' => $comment['created']
                 ]);
 
                 // check for children

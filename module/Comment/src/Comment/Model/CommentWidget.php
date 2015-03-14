@@ -66,7 +66,8 @@ class CommentWidget extends CommentBase
                 'active',
                 'user_id',
                 'guest_id',
-                'name'
+                'name',
+                'created'
             ])
             ->join(
                 ['b' => 'user_list'],

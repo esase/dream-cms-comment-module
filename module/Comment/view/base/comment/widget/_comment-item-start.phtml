@@ -34,7 +34,9 @@
             <?php else: ?>
                 <span class="comment-guest-name"><?php echo $this->escapeHtml($this->commenterName) ?></span>
             <?php endif ?>
-             14.04.84
+            <time datetime="<?php echo $this->escapeHtmlAttr(date('Y-m-d H:i', $this->created)) ?>">
+                <?php echo $this->applicationHumanDate($this->created) ?>
+            </time>
         </div>
         <div class="comment">
             <div class="comment-actions-wrapper">
@@ -55,6 +57,6 @@
             </div>
         </div>
         <div class="reply-link-wrapper">
-            <p><a href="#"><?php echo $this->translate('Reply') ?></a></p>
+            <p class="reply-comment"><a href="#"><?php echo $this->translate('Reply') ?></a></p>
         </div>
         <div class="comment-replies">
