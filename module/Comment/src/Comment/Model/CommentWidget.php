@@ -67,7 +67,8 @@ class CommentWidget extends CommentBase
                 'user_id',
                 'guest_id',
                 'name',
-                'created'
+                'created',
+                'level'                
             ])
             ->join(
                 ['b' => 'user_list'],
@@ -109,6 +110,7 @@ class CommentWidget extends CommentBase
 
             return $commentsTree;
         }
+
 
         return $resultSet->toArray();
     }

@@ -42,6 +42,7 @@
             <div class="comment-actions-wrapper">
                 <a class="approve-comment" href="#"><?php echo $this->translate('Approve') ?></a>
                 <a class="disapprove-comment" href="#"><?php echo $this->translate('Disapprove') ?></a>
+                <a class="spam-comment" href="#" confirm="<?php echo $this->escapeHtmlAttr($this->translate('Comment will be marked as a spam and deleted, are you sure?')) ?>"><?php echo $this->translate('Spam') ?></a>
                 <a class="delete-comment" href="#" confirm="<?php echo $this->escapeHtmlAttr($this->translate('Comment will be deleted, are you sure?')) ?>"><?php echo $this->translate('Delete') ?></a>
                 <a class="edit-comment" href="#"><?php echo $this->translate('Edit') ?></a>
             </div>
@@ -57,6 +58,8 @@
             </div>
         </div>
         <div class="reply-link-wrapper">
-            <p class="reply-comment"><a href="#"><?php echo $this->translate('Reply') ?></a></p>
+            <?php if ($this->show_reply): ?>
+                <p class="reply-comment"><a href="#"><?php echo $this->translate('Reply') ?></a></p>
+            <?php endif ?>
         </div>
         <div class="comment-replies">

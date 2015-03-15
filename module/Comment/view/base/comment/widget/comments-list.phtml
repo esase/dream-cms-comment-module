@@ -49,5 +49,6 @@
         .allowDeleteOwnComments(<?php echo $this->aclCheckPermission("comment_delete_own") ? 'true' : 'false' ?>)
         .allowEditComments(<?php echo $this->aclCheckPermission("comment_edit") ? 'true' : 'false' ?>)
         .allowEditOwnComments(<?php echo $this->aclCheckPermission("comment_edit_own") ? 'true' : 'false' ?>)
+        .allowSpamComments(<?php echo $this->aclCheckPermission("comment_spam") ? 'true' : 'false' ?>)
         .init();
 </script>

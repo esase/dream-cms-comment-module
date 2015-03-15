@@ -249,6 +249,7 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
     /**
      * Add comment
      *
+     * @param integer $maxNestedLevel
      * @param string $pageUrl
      * @param array $basicData
      *      integer active
@@ -261,13 +262,17 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
      * @param integer $replyId
      * @return array|string
      */
-    public function addComment($pageUrl, array $basicData, $pageId, $slug = null, $replyId = null)
+    public function addComment($maxNestedLevel, $pageUrl, array $basicData, $pageId, $slug = null, $replyId = null)
     {
         $replyComment = false;
 
         // get a reply comment info
         if ($replyId) {
             $replyComment = $this->getCommentInfo($replyId, $pageId, $slug);
+
+            if ($replyComment['level'] > $maxNestedLevel) {
+                return;
+            }
         }
 
         // the reply comment don't exsist or not active
@@ -292,7 +297,7 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
                 : self::COMMENT_STATUS_NOT_HIDDEN,
             'page_id' => $pageId,
             'slug' => $slug,
-            'ip' => ip2long($remote->getIpAddress()),
+            'ip' => inet_pton($remote->getIpAddress()),
             'guest_id' => empty($basicData['user_id']) ? $this->getGuestId() : null,
             'created' => time()
         ]);

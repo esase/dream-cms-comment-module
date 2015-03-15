@@ -52,7 +52,8 @@ div#global-comments-wrapper #comments-list-wrapper .media .media-body .comment-a
 div#global-comments-wrapper #comments-list-wrapper .media .media-body .comment-actions-wrapper a.approve-comment,
 div#global-comments-wrapper #comments-list-wrapper .media .media-body .comment-actions-wrapper a.disapprove-comment,
 div#global-comments-wrapper #comments-list-wrapper .media .media-body .comment-actions-wrapper a.delete-comment,
-div#global-comments-wrapper #comments-list-wrapper .media .media-body .comment-actions-wrapper a.edit-comment {
+div#global-comments-wrapper #comments-list-wrapper .media .media-body .comment-actions-wrapper a.edit-comment,
+div#global-comments-wrapper #comments-list-wrapper .media .media-body .comment-actions-wrapper a.spam-comment {
   margin-right: 5px;
   display: none;
 }

@@ -127,6 +127,44 @@ class CommentWidget extends PageAbstractWidget
     }
 
     /**
+     * Spam comment
+     *
+     * @apram integer $commentId
+     * @return boolean|array
+     */
+    protected function spamComment($commentId)
+    {
+        if (AclService::checkPermission('comment_spam', false)) {
+            if (null != ($commentInfo = $this->getModel()->
+                    getCommentModel()->getCommentInfo($commentId, $this->pageId, $this->getPageSlug()))) {
+
+                // mark as spam
+                if (true === ($result = $this->getModel()->spamComment(inet_ntop($commentInfo['ip'])))) {
+                    // increase ACL track
+                    AclService::checkPermission('comment_spam');
+
+                    // delete the comment
+                    if (true === ($result = $this->getModel()->getCommentModel()->deleteComment($commentInfo))) {
+                        AclService::checkPermission('comment_delete');
+
+                        return [
+                            'status' => 'success',
+                            'message' => ''
+                        ];
+                    }
+                }
+            }
+
+            return [
+                'status' => 'error',
+                'message' => $this->translate('Error occured, please try again later')
+            ];
+        }
+
+        return false;
+    }
+
+    /**
      * Approve comment
      *
      * @apram integer $commentId
@@ -196,6 +234,7 @@ class CommentWidget extends PageAbstractWidget
 
                 // get comment's status
                 $commentActive = $allowApprove || (int) $this->getSetting('comments_auto_approve');
+                $maxNestedLevel = (int) $this->getWidgetSetting('comment_max_nested_level');
 
                 // collect basic data
                 $basicData = [
@@ -208,8 +247,8 @@ class CommentWidget extends PageAbstractWidget
                         : null
                 ];
 
-                $commentInfo = $this->getModel()->
-                        getCommentModel()->addComment($pageUrl, $basicData, $this->pageId, $this->getPageSlug(), $replyId);
+                $commentInfo = $this->getModel()->getCommentModel()->
+                        addComment($maxNestedLevel, $pageUrl, $basicData, $this->pageId, $this->getPageSlug(), $replyId);
 
                 // return a status
                 if (is_array($commentInfo)) {
@@ -363,7 +402,8 @@ class CommentWidget extends PageAbstractWidget
             ->get('Application\Form\FormManager')
             ->getInstance('Comment\Form\Comment')
             ->enableCaptcha($captchaEnabled)
-            ->setGuestMode(UserIdentityService::isGuest());
+            ->setGuestMode(UserIdentityService::isGuest())
+            ->setModel($this->getModel());
 
         // get a comment info
         if ($commentId) {
@@ -437,8 +477,11 @@ class CommentWidget extends PageAbstractWidget
         //17. Allow all delete and edit own comments+
         //11. Send reply on email+
         //15 . Edit doesnt work if add comments disallowed +
+        // 16. Mark as a SPAM +
+        // 18. Max nested reply level+
         
-        // 16. Mark as a SPAM ???
+        // 19.Last comments widgets
+
         if (AclService::checkPermission('comment_view', false)) {
             // is approve allowing
             $allowApprove = AclService::checkPermission('comment_approve', false);
@@ -505,6 +548,13 @@ class CommentWidget extends PageAbstractWidget
                                     deleteComment($this->getRequest()->getQuery('widget_comment_id', -1)));
                         }
                         break;
+
+                    case 'spam_comment' :
+                        if ($this->getRequest()->isPost()) {
+                            return $this->getView()->json($this->
+                                    spamComment($this->getRequest()->getQuery('widget_comment_id', -1)));
+                        }
+                        break;
                 }
             }
 
@@ -560,6 +610,8 @@ class CommentWidget extends PageAbstractWidget
                 ? UserIdentityService::getCurrentUserIdentity()['user_id']
                 : $this->getModel()->getCommentModel()->getGuestId();
 
+            $maxRepliesNestedLevel = (int) $this->getWidgetSetting('comment_max_nested_level');
+
             // process comments
             foreach ($comments as $comment) {
                 $content = $this->getView()->partial('comment/widget/_comment-item-start', [
@@ -574,7 +626,8 @@ class CommentWidget extends PageAbstractWidget
                     'user_id' => $comment['user_id'],
                     'user_slug' => $comment['registred_slug'],
                     'user_avatar' => $comment['registred_avatar'],
-                    'created' => $comment['created']
+                    'created' => $comment['created'],
+                    'show_reply' => $comment['level'] <= $maxRepliesNestedLevel
                 ]);
 
                 // check for children

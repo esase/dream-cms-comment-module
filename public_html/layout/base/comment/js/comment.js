@@ -54,6 +54,12 @@ function Comment(translationsList)
     var allowEditOwnComments = false;
 
     /**
+     * Allow spam comments
+     * @var boolean
+     */
+    var allowSpamComments = false;
+
+    /**
      * Base url
      * @var string
      */
@@ -294,6 +300,59 @@ function Comment(translationsList)
     }
 
     /**
+     * Init spam links
+     *
+     * @return void
+     */
+    var initSpamLinks = function()
+    {
+        var $wrapper = $("#global-comments-wrapper #comments-list-wrapper");
+
+        // hide all spam links
+        $wrapper.find(".comment-actions-wrapper a.spam-comment").off().hide();
+
+        // show links only for allowed comments
+        $wrapper.find(".media-body a.spam-comment").filter(function() {
+            return allowSpamComments;
+        }).css("display", "inline").bind("click", function(e){
+            e.preventDefault();
+            var $link = $(this);
+
+            // show a confirm popup window
+            showConfirmPopup(translations.confirm_yes, translations.confirm_no, $(this), function() {
+                var $parent = $link.parents(".media:first");
+                var actionUrl = baseUrl + "&widget_action=spam_comment&widget_comment_id=" + $parent.attr("comment-id");
+
+                // spam comment
+                ajaxQuery($("#global-comments-wrapper #comments-list-wrapper"), actionUrl, function(data) {
+                    if (data) {
+                        data = $.parseJSON(data);
+
+                        // permission denied for marking as spam comments
+                        if (data === false) {
+                            removeSpamElements();
+                            showNotification(accessDeniedMessage);
+                        }
+                        else {
+                            if (data.status == "success") {
+                                deleteComment($parent);
+                            }
+
+                            if (data.message) {
+                                showNotification(data.message);
+                            }
+                        }
+                    }
+                    else {
+                        removeAllActionsElements();
+                        showNotification(accessDeniedMessage);
+                    }                    
+                }, "post", "", false);
+            });
+        });
+    }
+
+    /**
      * Delete comment
      *
      * @param object $comment
@@ -438,6 +497,20 @@ function Comment(translationsList)
     }
 
     /**
+     * Remove spam elements
+     *
+     * @return void
+     */
+    var removeSpamElements = function()
+    {
+        $("#global-comments-wrapper .comment-actions-wrapper a.spam-comment").remove();
+
+        if (allowSpamComments) {
+            allowSpamComments = false;
+        }
+    }
+
+    /**
      * Remove edit elements
      *
      * @return void
@@ -488,6 +561,7 @@ function Comment(translationsList)
         removeDisapproveElements();
         removeDeleteElements();
         removeEditElements();
+        removeSpamElements();
     }
 
     /**
@@ -692,6 +766,11 @@ function Comment(translationsList)
         !allowEditComments && !allowEditOwnComments
             ? removeEditElements()
             : initEditLinks();
+
+        // re init all spam links
+        !allowSpamComments
+            ? removeSpamElements()
+            : initSpamLinks();
     }
 
     /**
@@ -959,6 +1038,18 @@ function Comment(translationsList)
     }
 
     /**
+     * Allow spam comments
+     *
+     * @param boolean allowed
+     * @return object
+     */
+    this.allowSpamComments = function(allowed)
+    {
+        allowSpamComments = allowed;
+        return this;
+    }
+
+    /**
      * Init
      *
      * @return void
@@ -1007,6 +1098,14 @@ function Comment(translationsList)
         }
         else {
             initEditLinks();
+        }
+
+        // init spam elements
+        if (!allowSpamComments) {
+            removeSpamElements();
+        }
+        else {
+            initSpamLinks();
         }
 
         // build comments structure in a memory

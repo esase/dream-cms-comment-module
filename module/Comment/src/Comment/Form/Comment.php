@@ -1,8 +1,10 @@
 <?php
 namespace Comment\Form;
 
+use Comment\Model\CommentBase as CommentBaseModel;
 use Application\Form\ApplicationAbstractCustomForm;
 use Application\Form\ApplicationCustomFormBuilder;
+use Zend\Http\PhpEnvironment\RemoteAddress;
 
 class Comment extends ApplicationAbstractCustomForm 
 {
@@ -99,6 +101,17 @@ class Comment extends ApplicationAbstractCustomForm
                 unset($this->formElements['email']);
             }
 
+            // check for spam
+            $this->formElements['comment']['validators'] = [
+                [
+                    'name' => 'callback',
+                    'options' => [
+                        'callback' => [$this, 'validateSpamIp'],
+                        'message' => 'Your IP address blocked'
+                    ]
+                ]
+            ];
+
             $this->form = new ApplicationCustomFormBuilder($this->formName,
                     $this->formElements, $this->translator, $this->ignoredElements, $this->notValidatedElements, $this->method);    
         }
@@ -128,5 +141,32 @@ class Comment extends ApplicationAbstractCustomForm
     {
         $this->guestMode = $enable;
         return $this;
+    }
+
+    /**
+     * Set a model
+     *
+     * @param object $model
+     * @return object fluent interface
+     */
+    public function setModel(CommentBaseModel $model)
+    {
+        $this->model = $model;
+        return $this;
+    }
+
+    /**
+     * Validate spam IP
+     *
+     * @param $value
+     * @param array $context
+     * @return boolean
+     */
+    public function validateSpamIp($value, array $context = [])
+    {
+        $remote = new RemoteAddress;
+        $remote->setUseProxy(true);
+
+        return $this->model->isSpamIp($remote->getIpAddress()) ? false : true;
     }
 }

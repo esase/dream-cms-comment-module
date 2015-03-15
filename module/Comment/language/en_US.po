@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Dream CMS \"comment\" module\n"
 "POT-Creation-Date: 2013-07-19 11:59+0600\n"
-"PO-Revision-Date: 2015-03-13 11:03+0600\n"
+"PO-Revision-Date: 2015-03-15 13:34+0600\n"
 "Last-Translator: AlexE <alexermashev@gmail.com>\n"
 "Language-Team: \n"
 "Language: English\n"
@@ -14,6 +14,18 @@ msgstr ""
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "The maximum level of nested replies"
+msgstr "The maximum level of nested replies"
+
+msgid "Your IP address blocked"
+msgstr "Your IP address blocked"
+
+msgid "Comment will be marked as a spam and deleted, are you sure?"
+msgstr "Comment will be marked as a spam and deleted, are you sure?"
+
+msgid "Spam"
+msgstr "Spam"
 
 msgid "Comment reply message"
 msgstr "Comment reply message"
@@ -90,6 +102,15 @@ msgstr "Module allows to publish comments on the site"
 msgid "Comment"
 msgstr "Comment"
 
+msgid "Event - Adding comments spam IP"
+msgstr "Adding comments spam IP"
+
+msgid "Event - Comment spam ip added by guest"
+msgstr "Guest added the comment spam IP with id - \"%d\""
+
+msgid "Event - Comment spam ip added by user"
+msgstr "\"%s\" added the comment spam IP with id - \"%d\""
+
 msgid "Event - Editing comments"
 msgstr "Editing comments"
 
@@ -158,3 +179,6 @@ msgstr "Editing comments"
 
 msgid "ACL - Editing own comments"
 msgstr "Editing own comments"
+
+msgid "ACL - Marking comments as spam"
+msgstr "Marking comments as spam"

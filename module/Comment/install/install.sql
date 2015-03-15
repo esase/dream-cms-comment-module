@@ -16,7 +16,8 @@ INSERT INTO `acl_resource` (`resource`, `description`, `module`) VALUES
 ('comment_approve', 'ACL - Approving comments', @moduleId),
 ('comment_disapprove', 'ACL - Disapproving comments', @moduleId),
 ('comment_delete', 'ACL - Deleting comments', @moduleId),
-('comment_edit', 'ACL - Editing comments', @moduleId);
+('comment_edit', 'ACL - Editing comments', @moduleId),
+('comment_spam', 'ACL - Marking comments as spam', @moduleId);
 
 INSERT INTO `acl_resource` (`resource`, `description`, `module`) VALUES
 ('comment_add', 'ACL - Adding comments', @moduleId);
@@ -49,7 +50,8 @@ INSERT INTO `application_event` (`name`, `module`, `description`) VALUES
 ('comment_approve', @moduleId, 'Event - Approving comments'),
 ('comment_disapprove', @moduleId, 'Event - Disapproving comments'),
 ('comment_delete', @moduleId, 'Event - Deleting comments'),
-('comment_edit', @moduleId, 'Event - Editing comments');
+('comment_edit', @moduleId, 'Event - Editing comments'),
+('comment_add_spam_ip', @moduleId, 'Event - Adding comments spam IP');
 
 -- application settings
 
@@ -141,6 +143,13 @@ SET @widgetSettingId = (SELECT LAST_INSERT_ID());
 INSERT INTO `page_widget_setting_default_value` (`setting_id`, `value`, `language`) VALUES
 (@widgetSettingId, '450', NULL);
 
+INSERT INTO `page_widget_setting` (`name`, `widget`, `label`, `type`, `required`, `order`, `category`, `description`, `check`,  `check_message`, `values_provider`) VALUES
+('comment_max_nested_level', @widgetId, 'The maximum level of nested replies', 'integer', 1, 4, @displaySettingCategoryId, NULL, 'return intval(''__value__'') > 0;', 'Value should be greater than 0', NULL);
+SET @widgetSettingId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_widget_setting_default_value` (`setting_id`, `value`, `language`) VALUES
+(@widgetSettingId, '1', NULL);
+
 INSERT INTO `page_system_widget_hidden` (`page_id`, `widget_id`) VALUES
 (2,  @widgetId),
 (3,  @widgetId),
@@ -159,7 +168,7 @@ INSERT INTO `page_system_widget_hidden` (`page_id`, `widget_id`) VALUES
 CREATE TABLE `comment_list` (
     `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `comment` TEXT NOT NULL,
-    `ip` INT(10) UNSIGNED NOT NULL,
+    `ip` VARBINARY(16) NOT NULL,
     `name` VARCHAR(50) DEFAULT NULL,
     `email` VARCHAR(50) DEFAULT NULL,
     `active` TINYINT(1) UNSIGNED NULL DEFAULT '1',
@@ -182,4 +191,11 @@ CREATE TABLE `comment_list` (
     FOREIGN KEY (`user_id`) REFERENCES `user_list`(`user_id`)
         ON UPDATE CASCADE
         ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `comment_spam_ip` (
+    `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `ip` VARBINARY(16) NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY (`ip`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
