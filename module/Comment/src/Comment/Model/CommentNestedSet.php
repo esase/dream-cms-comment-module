@@ -249,6 +249,7 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
     /**
      * Add comment
      *
+     * @param string $language
      * @param integer $maxNestedLevel
      * @param string $pageUrl
      * @param array $basicData
@@ -262,7 +263,7 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
      * @param integer $replyId
      * @return array|string
      */
-    public function addComment($maxNestedLevel, $pageUrl, array $basicData, $pageId, $slug = null, $replyId = null)
+    public function addComment($language, $maxNestedLevel, $pageUrl, array $basicData, $pageId, $slug = null, $replyId = null)
     {
         $replyComment = false;
 
@@ -299,7 +300,8 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
             'slug' => $slug,
             'ip' => inet_pton($remote->getIpAddress()),
             'guest_id' => empty($basicData['user_id']) ? $this->getGuestId() : null,
-            'created' => time()
+            'created' => time(),
+            'language' => $language
         ]);
 
         $parentLevel   = $replyComment ? $replyComment['level']    : 0;

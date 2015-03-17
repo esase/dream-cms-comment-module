@@ -45,6 +45,70 @@ class CommentWidget extends CommentBase
     }
 
     /**
+     * Get last comments
+     * 
+     * @param string $language
+     * @param integer $limit    
+     * @param integer $userId
+     * @return object Zend\Db\ResultSet\ResultSet
+     */
+    public function getLastComments($language, $limit, $userId = null)
+    {
+        $select = $this->select();
+        $select->from(['a' => 'comment_list'])
+            ->columns([
+                'id',
+                'comment',
+                'created',
+                'slug'
+            ])
+            ->join(
+                ['b' => 'page_structure'],
+                'a.page_id = b.id',
+                [
+                    'page_slug' => 'slug'
+                ]
+            )
+            ->join(
+                ['c' => 'comment_list'],
+                'c.id = a.parent_id',
+                [
+                    'reply_id' => 'id',
+                    'reply_guest_name' => 'name',
+                    'reply_user_id' => 'user_id'
+                ],
+                'left'
+            )
+            ->join(
+                ['d' => 'user_list'],
+                'd.user_id = c.user_id',
+                [
+                    'reply_nickname' => 'nick_name',
+                    'reply_slug' => 'slug',
+                ],
+                'left'
+            )
+            ->where([
+                'a.language' => $language,
+                'a.hidden' => CommentNestedSet::COMMENT_STATUS_NOT_HIDDEN
+            ])
+            ->limit($limit)
+            ->order('a.created desc');
+
+        if ($userId) {
+            $select->where([
+                'a.user_id' => $userId
+            ]);
+        }
+
+        $statement = $this->prepareStatementForSqlObject($select);
+        $resultSet = new ResultSet;
+        $resultSet->initialize($statement->execute());
+
+        return $resultSet;
+    }
+
+    /**
      * Get comments
      *
      * @param boolean $allowApprove

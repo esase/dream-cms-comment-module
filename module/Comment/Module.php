@@ -66,7 +66,8 @@ class Module
     {
         return [
             'invokables' => [
-                'commentWidget' => 'Comment\View\Widget\CommentWidget'
+                'commentWidget' => 'Comment\View\Widget\CommentWidget',
+                'commentLastUserCommentsWidget' => 'Comment\View\Widget\CommentLastUserCommentsWidget'
             ]
         ];
     }

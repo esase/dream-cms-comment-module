@@ -163,6 +163,27 @@ INSERT INTO `page_system_widget_hidden` (`page_id`, `widget_id`) VALUES
 (12, @widgetId),
 (13, @widgetId);
 
+INSERT INTO `page_widget` (`name`, `module`, `type`, `description`, `duplicate`, `forced_visibility`, `depend_page_id`, `allow_cache`) VALUES
+('commentLastUserCommentsWidget', @moduleId, 'public', 'Last user\'s comments', NULL, NULL, NULL, NULL);
+SET @widgetId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_widget_page_depend` (`page_id`, `widget_id`) VALUES
+(10, @widgetId);
+
+INSERT INTO `page_widget_setting` (`name`, `widget`, `label`, `type`, `required`, `order`, `category`, `description`, `check`,  `check_message`, `values_provider`) VALUES
+('comment_count', @widgetId, 'Count of last comments', 'integer', 1, 1, @displaySettingCategoryId, NULL, 'return intval(''__value__'') > 0;', 'Value should be greater than 0', NULL);
+SET @widgetSettingId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_widget_setting_default_value` (`setting_id`, `value`, `language`) VALUES
+(@widgetSettingId, '5', NULL);
+
+INSERT INTO `page_widget_setting` (`name`, `widget`, `label`, `type`, `required`, `order`, `category`, `description`, `check`,  `check_message`, `values_provider`) VALUES
+('comment_visible_chars', @widgetId, 'Visible count of chars in comments', 'integer', 1, 2, @displaySettingCategoryId, NULL, 'return intval(''__value__'') > 0;', 'Value should be greater than 0', NULL);
+SET @widgetSettingId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_widget_setting_default_value` (`setting_id`, `value`, `language`) VALUES
+(@widgetSettingId, '450', NULL);
+
 -- module tables
 
 CREATE TABLE `comment_list` (
@@ -182,15 +203,20 @@ CREATE TABLE `comment_list` (
     `level` INT(10) NOT NULL DEFAULT '0',
     `parent_id` INT(10) UNSIGNED DEFAULT NULL,
     `created` INT(10) UNSIGNED NOT NULL,
+    `language` CHAR(2) NOT NULL,
     PRIMARY KEY (`id`),
     KEY `node` (`left_key`, `right_key`, `page_id`, `slug`, `active`, `level`),
     KEY `comment` (`page_id`, `slug`, `hidden`, `right_key`),
+    KEY `user_comment` (`language`, `hidden`, `user_id`),
     FOREIGN KEY (`page_id`) REFERENCES `page_structure`(`id`)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
     FOREIGN KEY (`user_id`) REFERENCES `user_list`(`user_id`)
         ON UPDATE CASCADE
-        ON DELETE SET NULL
+        ON DELETE SET NULL,
+    FOREIGN KEY (`language`) REFERENCES `localization_list`(`language`)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `comment_spam_ip` (

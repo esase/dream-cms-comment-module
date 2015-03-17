@@ -4,31 +4,10 @@ namespace Comment\View\Widget;
 use Acl\Service\Acl as AclService;
 use Comment\Model\CommentNestedSet;
 use Page\Service\Page as PageService;
-use Page\View\Widget\PageAbstractWidget;
 use User\Service\UserIdentity as UserIdentityService;
 
-class CommentWidget extends PageAbstractWidget
+class CommentWidget extends AbstractCommentWidget
 {
-    /**
-     * Model instance
-     * @var object  
-     */
-    protected $model;
-
-    /**
-     * Get model
-     */
-    protected function getModel()
-    {
-        if (!$this->model) {
-            $this->model = $this->getServiceLocator()
-                ->get('Application\Model\ModelManager')
-                ->getInstance('Comment\Model\CommentWidget');
-        }
-
-        return $this->model;
-    }
-
     /**
      * Include js and css files
      *
@@ -247,8 +226,8 @@ class CommentWidget extends PageAbstractWidget
                         : null
                 ];
 
-                $commentInfo = $this->getModel()->getCommentModel()->
-                        addComment($maxNestedLevel, $pageUrl, $basicData, $this->pageId, $this->getPageSlug(), $replyId);
+                $commentInfo = $this->getModel()->getCommentModel()->addComment($this->
+                        getCurrentLanguage(), $maxNestedLevel, $pageUrl, $basicData, $this->pageId, $this->getPageSlug(), $replyId);
 
                 // return a status
                 if (is_array($commentInfo)) {
@@ -481,7 +460,8 @@ class CommentWidget extends PageAbstractWidget
         // 18. Max nested reply level+
         
         // 19.Last comments widgets
-
+        // 20. Don't show comments widgets on special pages like:404, dashboard etc
+        // 21 . Delete comments when some page's object deleted
         if (AclService::checkPermission('comment_view', false)) {
             // is approve allowing
             $allowApprove = AclService::checkPermission('comment_approve', false);
