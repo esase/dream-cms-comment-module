@@ -8,6 +8,20 @@ use User\Service\UserIdentity as UserIdentityService;
 class CommentLastUserCommentsWidget extends AbstractCommentWidget
 {
     /**
+     * Include js and css files
+     *
+     * @return void
+     */
+    public function includeJsCssFiles()
+    {
+        $this->getView()->layoutHeadScript()->
+                appendFile($this->getView()->layoutAsset('last-comment.js', 'js', 'comment'));
+
+        $this->getView()->layoutHeadLink()->
+                appendStylesheet($this->getView()->layoutAsset('last-comment.css', 'css', 'comment'));
+    }
+
+    /**
      * Get widget content
      *
      * @return string|boolean

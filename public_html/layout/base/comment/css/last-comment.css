@@ -1,0 +1,4 @@
+div#user-last-comments span.comment-text-hidden,
+div#last-comments span.comment-text-hidden  {
+    display: none;
+}

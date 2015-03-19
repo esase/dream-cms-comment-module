@@ -17,6 +17,9 @@ class CommentWidget extends AbstractCommentWidget
     {
         $this->getView()->layoutHeadScript()->
                 appendFile($this->getView()->layoutAsset('comment.js', 'js', 'comment'));
+
+        $this->getView()->layoutHeadLink()->
+                appendStylesheet($this->getView()->layoutAsset('main.css', 'css', 'comment'));
     }
 
     /**

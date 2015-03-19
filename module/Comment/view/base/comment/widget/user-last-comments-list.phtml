@@ -2,7 +2,6 @@
 <?php $this->userPage = $this->pageUrl('user', [], null, true) ?>
 
 <div id="user-last-comments">
-
     <?php foreach($this->comments as $comment): ?>
         <div class="media">
             <div class="media-body">
@@ -36,13 +35,13 @@
                     <?php if (mb_strlen($comment->comment) <= $this->visible_chars): ?>
                         <?php echo  $this->escapeHtml($comment->comment) ?>
                     <?php else: ?>
-                        <span><?php echo (mb_substr($comment->comment, 0, $this->visible_chars)) ?><span style="display: none" class="comment-text-hidden"><?php echo (mb_substr($comment->comment, $this->visible_chars)) ?></span></span>
+                        <span><?php echo (mb_substr($comment->comment, 0, $this->visible_chars)) ?><span class="comment-text-hidden"><?php echo (mb_substr($comment->comment, $this->visible_chars)) ?></span></span>
                         <a class="comment-more" href="#">
                             <?php echo $this->translate('Show more ...') ?>
                         </a>
                     <?php endif ?>
                 </p>
-                <?php $this->commentPage = $this->pageUrl($comment->page_slug, [], null, true) ?>
+                <?php $this->commentPage = $this->pageUrl($comment->page_slug, [], null, false, $comment->slug) ?>
                 <?php if (false !== $this->commentPage): ?>
                     <p>
                         <a href="<?php echo $this->url('page', ['page_name' => $this->commentPage, 'slug' => $comment->slug], ['force_canonical' => true]) ?>#comment-<?php echo (int) $comment->id ?>">
@@ -53,54 +52,4 @@
             </div>
         </div>
     <?php endforeach ?>
-
-    <?php $this->inlineScript()->captureStart() ?>
-        $("#user-last-comments .media a.comment-more").bind("click", function(e) {
-            e.preventDefault();
-
-            // show a hidden part of comment
-            $(this).parent().find(".comment-text-hidden").show();
-            $(this).remove();
-        });
-    <?php $this->inlineScript()->captureEnd() ?>
 </div>
-
-<!-- 
-<div class="media">
-    <div class="media-body">
-        <p><time datetime="2015-03-17 04:23">1 минуту назад</time></p>
-        <p>
-            Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-        </p>
-        <p><a href="#">View on page</a></p>
-    </div>
-</div>
-
-
-
-<div class="media">
-    <div class="media-body">
-        <p> Reply to: <a href="#">Alex Grady</a>  <time datetime="2015-03-17 04:23">21 минуту назад</time></p>
-        <p>
-           <span> Cras sit amet nibh liberasd dsadsadsad
-            s
-            dsadsads
-            adsadsd
-            sad
-            sad
-            sado, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum n
-            Cras sit amet nibh liberasd dsadsadsad
-            s
-            dsadsads
-            adsadsd
-            sad
-            sad
-            sado, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-           </span>
-             <a class="comment-more" href="#">
-                <?php echo $this->translate('Show more ...') ?>
-            </a>
-       </p>
-        <p><a href="#">View on page</a></p>
-    </div>
-</div> -->
