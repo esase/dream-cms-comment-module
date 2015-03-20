@@ -34,19 +34,22 @@ div#global-comments-wrapper {
     }
 
     // comments list wrapper
-    #comments-list-wrapper {
+    ul#comments-list-wrapper {
         position: relative;
+        margin:0;
+        padding:0;
 
         .media {
+            margin:0;
             color: @comments-list-wrapper-media-color;
             overflow: hidden;
 
             .media-left{
-                min-width: @comments-list-wrapper-media-left-min-width;
+                min-width: @comments-media-left-min-width;
 
                 .media-object{
-                    width: @comments-list-wrapper-media-object-width; 
-                    height: @comments-list-wrapper-media-object-height;
+                    width: @comments-media-object-width; 
+                    height: @comments-media-object-height;
                 }
             }
 
@@ -82,10 +85,6 @@ div#global-comments-wrapper {
                     }
                 }
             }
-        }
-
-        .media:first-child {
-            margin-top: @comments-list-wrapper-media-first-child-margin-top;
         }
 
         .disapproved {

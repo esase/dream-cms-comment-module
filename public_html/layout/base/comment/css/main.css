@@ -21,49 +21,49 @@ div#global-comments-wrapper div.comment-reply-form-wrapper span {
 div#global-comments-wrapper div.comment-reply-form-wrapper img {
   margin-bottom: 10px;
 }
-div#global-comments-wrapper #comments-list-wrapper {
+div#global-comments-wrapper ul#comments-list-wrapper {
   position: relative;
+  margin: 0;
+  padding: 0;
 }
-div#global-comments-wrapper #comments-list-wrapper .media {
+div#global-comments-wrapper ul#comments-list-wrapper .media {
+  margin: 0;
   color: #333333;
   overflow: hidden;
 }
-div#global-comments-wrapper #comments-list-wrapper .media .media-left {
+div#global-comments-wrapper ul#comments-list-wrapper .media .media-left {
   min-width: 52px;
 }
-div#global-comments-wrapper #comments-list-wrapper .media .media-left .media-object {
+div#global-comments-wrapper ul#comments-list-wrapper .media .media-left .media-object {
   width: 32px;
   height: 32px;
 }
-div#global-comments-wrapper #comments-list-wrapper .media .media-body {
+div#global-comments-wrapper ul#comments-list-wrapper .media .media-body {
   width: 10000px;
 }
-div#global-comments-wrapper #comments-list-wrapper .media .media-body .comment .comment-text {
+div#global-comments-wrapper ul#comments-list-wrapper .media .media-body .comment .comment-text {
   margin-bottom: 10px;
 }
-div#global-comments-wrapper #comments-list-wrapper .media .media-body .comment .comment-text .comment-text-hidden {
+div#global-comments-wrapper ul#comments-list-wrapper .media .media-body .comment .comment-text .comment-text-hidden {
   display: none;
 }
-div#global-comments-wrapper #comments-list-wrapper .media .media-body .comment-actions-wrapper {
+div#global-comments-wrapper ul#comments-list-wrapper .media .media-body .comment-actions-wrapper {
   font-size: 12px;
   margin-bottom: 10px;
   margin-top: 5px;
 }
-div#global-comments-wrapper #comments-list-wrapper .media .media-body .comment-actions-wrapper a.approve-comment,
-div#global-comments-wrapper #comments-list-wrapper .media .media-body .comment-actions-wrapper a.disapprove-comment,
-div#global-comments-wrapper #comments-list-wrapper .media .media-body .comment-actions-wrapper a.delete-comment,
-div#global-comments-wrapper #comments-list-wrapper .media .media-body .comment-actions-wrapper a.edit-comment,
-div#global-comments-wrapper #comments-list-wrapper .media .media-body .comment-actions-wrapper a.spam-comment {
+div#global-comments-wrapper ul#comments-list-wrapper .media .media-body .comment-actions-wrapper a.approve-comment,
+div#global-comments-wrapper ul#comments-list-wrapper .media .media-body .comment-actions-wrapper a.disapprove-comment,
+div#global-comments-wrapper ul#comments-list-wrapper .media .media-body .comment-actions-wrapper a.delete-comment,
+div#global-comments-wrapper ul#comments-list-wrapper .media .media-body .comment-actions-wrapper a.edit-comment,
+div#global-comments-wrapper ul#comments-list-wrapper .media .media-body .comment-actions-wrapper a.spam-comment {
   margin-right: 5px;
   display: none;
 }
-div#global-comments-wrapper #comments-list-wrapper .media .media-body .comment-actions-wrapper .popover {
+div#global-comments-wrapper ul#comments-list-wrapper .media .media-body .comment-actions-wrapper .popover {
   color: #333333;
 }
-div#global-comments-wrapper #comments-list-wrapper .media:first-child {
-  margin-top: 15px;
-}
-div#global-comments-wrapper #comments-list-wrapper .disapproved {
+div#global-comments-wrapper ul#comments-list-wrapper .disapproved {
   color: #c0c0c0;
 }
 div#global-comments-wrapper div#comments-empty-wrapper {

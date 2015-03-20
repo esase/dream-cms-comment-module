@@ -2,7 +2,20 @@
 
 div#user-last-comments,
 div#last-comments {
-    span.comment-text-hidden {
-        display: none;
+    .media {
+        .media-left{
+            min-width: @comments-media-left-min-width;
+
+            .media-object{
+                width: @comments-media-object-width; 
+                height: @comments-media-object-height;
+            }
+        }
+
+        .media-body {
+            span.comment-text-hidden {
+                display: none;
+            }
+        }
     }
 }

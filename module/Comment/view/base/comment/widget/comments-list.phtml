@@ -11,14 +11,12 @@
         <?php echo $this->comment_form ?>
     <?php endif ?>
 
-    <div id="comments-list-wrapper">
+    <ul id="comments-list-wrapper">
         <?php if ($this->comments): ?>
-            <ul>
-                <?php echo $this->comments ?>
-            </ul>
+            <?php echo $this->comments ?>
         <?php endif ?>
-    </div>
-
+    </ul>
+    
     <div id="comments-empty-wrapper" class="alert alert-warning">
         <?php echo $this->translate('Comment on first') ?>
     </div>
@@ -33,18 +31,6 @@
     <?php endif ?>
 
 </div>
-<style>
-    #comments-list-wrapper > ul {
-        margin:0;
-        padding:0;
-    }
-
-    #comments-list-wrapper ul li {
-        margin:0 !important;
-        list-style: none;
-    }
-
-</style>
 
 <?php $this->inlineScript()->captureStart() ?>
     var comment = new Comment({
