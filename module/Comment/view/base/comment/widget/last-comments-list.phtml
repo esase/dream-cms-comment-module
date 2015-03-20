@@ -1,0 +1,85 @@
+<?php $this->declareVars('commentPage', 'userPage', 'commenterName', 'commenterUrl', 'replyCommenterName', 'replyCommenterUrl') ?>
+<?php $this->userPage = $this->pageUrl('user', [], null, true) ?>
+
+<div id="user-last-comments">
+    <?php foreach($this->comments as $comment): ?>
+         <div class="media">
+            <?php 
+                $this->commenterName = $comment->guest_name && !$comment->user_id
+                    ? $comment->guest_name
+                    : ($comment->nick_name ? $comment->nick_name : $this->translate('guest'));
+
+                $this->commenterUrl = $comment->user_id && false !== $this->userPage
+                    ? $this->url('page', ['page_name' => $this->userPage, 'slug' => $comment->user_slug], ['force_canonical' => true])
+                    : null;
+            ?>
+            <?php if ($this->show_thumbs): ?>
+                <div class="media-left">
+                    <?php if ($this->commenterUrl): ?>
+                        <a href="<?php echo $this->commenterUrl ?>" class="thumbnail">
+                            <img alt="<?php echo $this->escapeHtmlAttr($this->commenterName) ?>" class="media-object" src="<?php echo $this->userAvatarUrl($comment->avatar) ?>" />
+                        </a>
+                    <?php else: ?>
+                        <div class="thumbnail">
+                            <img alt="<?php echo $this->escapeHtmlAttr($this->commenterName) ?>" class="media-object" src="<?php echo $this->userAvatarUrl($comment->avatar) ?>" />
+                        </div>
+                    <?php endif ?>
+                </div>
+            <?php endif ?>
+            <div class="media-body">
+                <p>
+                    <?php if ($this->commenterUrl): ?>
+                        <a href="<?php echo $this->commenterUrl ?>">
+                            <?php echo $this->escapeHtml($this->commenterName) ?>
+                        </a>
+                    <?php else: ?>
+                        <span class="comment-guest-name"><?php echo $this->escapeHtml($this->commenterName) ?></span>
+                    <?php endif ?>
+
+                    <?php if ($comment->reply_id): ?>
+                        (<?php echo $this->translate('Reply to') ?>:
+                        <?php 
+                            $this->replyCommenterName = $comment->reply_guest_name && !$comment->reply_user_id
+                                ? $comment->reply_guest_name
+                                : ($comment->reply_nickname ? $comment->reply_nickname : $this->translate('guest'));
+
+                            $this->replyCommenterUrl = $comment->reply_user_id && false !== $this->userPage
+                                ? $this->url('page', ['page_name' => $this->userPage, 'slug' => $comment->reply_slug], ['force_canonical' => true])
+                                : null;
+                        ?>
+ 
+                        <?php if ($this->replyCommenterUrl): ?>
+                            <a href="<?php echo $this->replyCommenterUrl ?>">
+                                <?php echo $this->escapeHtml($this->replyCommenterName) ?>
+                            </a>
+                        <?php else: ?>
+                            <?php echo $this->escapeHtml($this->replyCommenterName) ?>
+                        <?php endif ?>)
+                    <?php endif ?>
+
+                    <time datetime="<?php echo $this->escapeHtmlAttr(date('Y-m-d H:i', $comment->created)) ?>">
+                        <?php echo $this->applicationHumanDate($comment->created) ?>
+                    </time>
+                </p>
+                <p>
+                    <?php if (mb_strlen($comment->comment) <= $this->visible_chars): ?>
+                        <?php echo  $this->escapeHtml($comment->comment) ?>
+                    <?php else: ?>
+                        <span><?php echo (mb_substr($comment->comment, 0, $this->visible_chars)) ?><span class="comment-text-hidden"><?php echo (mb_substr($comment->comment, $this->visible_chars)) ?></span></span>
+                        <a class="comment-more" href="#">
+                            <?php echo $this->translate('Show more ...') ?>
+                        </a>
+                    <?php endif ?>
+                </p>
+                <?php $this->commentPage = $this->pageUrl($comment->page_slug, [], null, false, $comment->slug) ?>
+                <?php if (false !== $this->commentPage): ?>
+                    <p>
+                        <a href="<?php echo $this->url('page', ['page_name' => $this->commentPage, 'slug' => $comment->slug], ['force_canonical' => true]) ?>#comment-<?php echo (int) $comment->id ?>">
+                            <?php echo $this->translate('View on page') ?>
+                        </a>
+                   </p>
+                <?php endif ?>
+            </div>
+        </div>
+    <?php endforeach ?>
+</div>

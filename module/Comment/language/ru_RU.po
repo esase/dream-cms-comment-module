@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Dream CMS \"comment\" module\n"
 "POT-Creation-Date: 2013-07-19 11:59+0600\n"
-"PO-Revision-Date: 2015-02-21 13:11+0600\n"
+"PO-Revision-Date: 2015-03-20 15:13+0600\n"
 "Last-Translator: AlexE <alexermashev@gmail.com>\n"
 "Language-Team: \n"
 "Language: Русский\n"
@@ -16,6 +16,102 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
+msgid "Show users thumbs"
+msgstr "Отображать миниатюры пользователей"
+
+msgid "Last comments"
+msgstr "Последние комментарии"
+
+msgid "Reply to"
+msgstr "Ответ"
+
+msgid "View on page"
+msgstr "Смотреть на странице"
+
+msgid "Count of last comments"
+msgstr "Количество последних комментариев"
+
+msgid "Last user's comments"
+msgstr "Последние комментарии пользователя"
+
+msgid "The maximum level of nested replies"
+msgstr "Максимальный уровень вложенных ответов"
+
+msgid "Your IP address blocked"
+msgstr "Ваш IP-адрес заблокирован"
+
+msgid "Comment will be marked as a spam and deleted, are you sure?"
+msgstr "Комментарий будет отмечен как спам и удален, Вы уверены?"
+
+msgid "Spam"
+msgstr "Спам"
+
+msgid "Comment reply message"
+msgstr "Сообщение ответа комментария"
+
+msgid "A comment reply notification"
+msgstr "Уведомление ответа на комментарий"
+
+msgid "Comment reply title"
+msgstr "Заголовок ответа комментария"
+
+msgid "Send notifications about new replies"
+msgstr "Отправлять уведомления о новых ответах"
+
+msgid "Visible count of chars in comments"
+msgstr "Видимое кол-во символов в комментариях"
+
+msgid "Show more ..."
+msgstr "Показать больше ..."
+
+msgid "Comment will be deleted, are you sure?"
+msgstr "Комментарий будет удален, Вы уверены?"
+
+msgid "Comment on first"
+msgstr "Прокомментировать первым"
+
+msgid "Disapprove"
+msgstr "Дезактивировать"
+
+msgid "Notification"
+msgstr "Уведомление"
+
+msgid "Approve"
+msgstr "Активировать"
+
+msgid "Comment added message"
+msgstr "Сообщение добавления комментария"
+
+msgid "A comment add notification"
+msgstr "Уведомление добавления комментария"
+
+msgid "Comment added title"
+msgstr "Заголовок добавления комментария"
+
+msgid "Send notifications about new comments"
+msgstr "Отправлять уведомления о новых комментариях"
+
+msgid "Comments auto approve"
+msgstr "Авто подтверждение комментариев"
+
+msgid "Reply"
+msgstr "Ответить"
+
+msgid "Load more"
+msgstr "Загрузить еще"
+
+msgid "Count of comments per page"
+msgstr "Количество комментариев на странице"
+
+msgid "Display options"
+msgstr "Параметры отображения"
+
+msgid "Error occured, please try again later"
+msgstr "Произошла ошибка, пожалуйста, попробуйте еще раз позже"
+
+msgid "Your comment will be available after approving"
+msgstr "Ваш комментарий будет доступен после утверждения"
+
 msgid "Comments"
 msgstr "Комментарии"
 
@@ -24,3 +120,84 @@ msgstr "Модуль позволяет публиковать коммента�
 
 msgid "Comment"
 msgstr "Комментарий"
+
+msgid "Event - Adding comments spam IP"
+msgstr "Добавление спам IP комментариев"
+
+msgid "Event - Comment spam ip added by guest"
+msgstr "Гость добавил спам IP комментария с идентификатором - \"%d\""
+
+msgid "Event - Comment spam ip added by user"
+msgstr "\"%s\" добавил(а) спам IP комментария с идентификатором - \"%d\""
+
+msgid "Event - Editing comments"
+msgstr "Редактирование комментариев"
+
+msgid "Event - Comment edited by guest"
+msgstr "Гость отредактировал комментарий с идентификатором - \"%d\""
+
+msgid "Event - Comment edited by user"
+msgstr "\"%s\" отредактировал(а) комментарий с идентификатором - \"%d\""
+
+msgid "Event - Deleting comments"
+msgstr "Удаление комментариев"
+
+msgid "Event - Comment deleted by guest"
+msgstr "Гость удалил комментарий с идентификатором - \"%d\""
+
+msgid "Event - Comment deleted by user"
+msgstr "\"%s\" удалил(а) комментарий с идентификатором - \"%d\""
+
+msgid "Event - Disapproving comments"
+msgstr "Дезактивирование комментариев"
+
+msgid "Event - Comment disapproved by guest"
+msgstr "Гость дезактивировал комментарий с идентификатором - \"%d\""
+
+msgid "Event - Comment disapproved by user"
+msgstr "\"%s\" дезактивировал(а) комментарий с идентификатором - \"%d\""
+
+msgid "Event - Approving comments"
+msgstr "Активация комментариев"
+
+msgid "Event - Comment approved by guest"
+msgstr "Гость активировал комментарий с идентификатором - \"%d\""
+
+msgid "Event - Comment approved by user"
+msgstr "\"%s\" активировал(а) комментарий с идентификатором - \"%d\""
+
+msgid "Event - Adding comments"
+msgstr "Добавление комментариев"
+
+msgid "Event - Comment added by guest"
+msgstr "Гость добавил комментарий с идентификатором - \"%d\""
+
+msgid "Event - Comment added by user"
+msgstr "\"%s\" добавил(а) комментарий с идентификатором - \"%d\""
+
+msgid "ACL - Viewing comments"
+msgstr "Просмотр комментариев"
+
+msgid "ACL - Adding comments"
+msgstr "Добавление комментариев"
+
+msgid "ACL - Disapproving comments"
+msgstr "Дезактивирование комментариев"
+
+msgid "ACL - Approving comments"
+msgstr "Активация комментариев"
+
+msgid "ACL - Deleting comments"
+msgstr "Удаление комментариев"
+
+msgid "ACL - Deleting own comments"
+msgstr "Удаление собственных комментариев"
+
+msgid "ACL - Editing comments"
+msgstr "Редактирование комментариев"
+
+msgid "ACL - Editing own comments"
+msgstr "Редактирование собственных комментариев"
+
+msgid "ACL - Marking comments as spam"
+msgstr "Маркировка комментариев как спам"

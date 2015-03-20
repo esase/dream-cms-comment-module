@@ -1,0 +1,100 @@
+@import "variables/main.less";
+
+div#global-comments-wrapper {
+    // paginator
+    div#comments-paginator-wrapper {
+        margin-bottom: @comments-paginator-wrapper-margin-bottom;
+    }
+
+    // action denied
+    div#comments-action-denied {
+        display: none;
+    }
+
+    // comment form wrapper
+    div.comment-reply-form-wrapper {
+        background-color: @comment-reply-form-wrapper-background-color;
+        padding: @comment-reply-form-wrapper-padding;
+        margin-bottom: @comment-reply-form-wrapper-margin-bottom;
+        color: @comment-reply-form-wrapper-color;
+
+        .form-control {
+            font-weight:normal;
+        }
+
+        span {
+            display: block;
+            margin-top: @comment-reply-form-wrapper-span-margin-top;
+            margin-bottom: @comment-reply-form-wrapper-span-margin-bottom;
+        }
+
+        img {
+            margin-bottom: @comment-reply-form-wrapper-image-margin-bottom;
+        }
+    }
+
+    // comments list wrapper
+    ul#comments-list-wrapper {
+        position: relative;
+        margin:0;
+        padding:0;
+
+        .media {
+            margin:0;
+            color: @comments-list-wrapper-media-color;
+            overflow: hidden;
+
+            .media-left{
+                min-width: @comments-media-left-min-width;
+
+                .media-object{
+                    width: @comments-media-object-width; 
+                    height: @comments-media-object-height;
+                }
+            }
+
+            .media-body {
+                width:10000px;
+
+                .comment {
+                    .comment-text{
+                        margin-bottom: @comments-list-wrapper-media-body-comment-text-margin-bottom;
+
+                        .comment-text-hidden{
+                            display:none;
+                        }
+                    }
+                }
+
+                .comment-actions-wrapper {
+                    font-size: @comments-list-wrapper-media-body-comment-actions-wrapper-font-size;
+                    margin-bottom: @comments-list-wrapper-media-body-comment-actions-wrapper-margin-bottom;
+                    margin-top: @comments-list-wrapper-media-body-comment-actions-wrapper-margin-top;
+                    
+                    a.approve-comment,
+                    a.disapprove-comment,
+                    a.delete-comment,
+                    a.edit-comment,
+                    a.spam-comment{
+                        margin-right: @comments-list-wrapper-media-body-comment-actions-wrapper-action-margin-right;
+                        display: none;
+                    }
+
+                    .popover {
+                        color: @comments-list-wrapper-media-body-comment-actions-wrapper-popover-color;
+                    }
+                }
+            }
+        }
+
+        .disapproved {
+            color: @comments-list-wrapper-disapproved-color;  
+        }
+    }
+
+    // empty wrapper
+    div#comments-empty-wrapper {
+        display: block;
+        margin:0;
+    }
+}
