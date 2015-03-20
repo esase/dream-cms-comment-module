@@ -67,7 +67,8 @@ class Module
         return [
             'invokables' => [
                 'commentWidget' => 'Comment\View\Widget\CommentWidget',
-                'commentLastUserCommentsWidget' => 'Comment\View\Widget\CommentLastUserCommentsWidget'
+                'commentLastUserCommentsWidget' => 'Comment\View\Widget\CommentLastUserCommentsWidget',
+                'commentLastCommentsWidget' => 'Comment\View\Widget\CommentLastCommentsWidget'
             ]
         ];
     }

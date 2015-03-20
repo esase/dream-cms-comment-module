@@ -60,7 +60,9 @@ class CommentWidget extends CommentBase
                 'id',
                 'comment',
                 'created',
-                'slug'
+                'slug',
+                'guest_name' => 'name',
+                'user_id'
             ])
             ->join(
                 ['b' => 'page_structure'],
@@ -85,6 +87,16 @@ class CommentWidget extends CommentBase
                 [
                     'reply_nickname' => 'nick_name',
                     'reply_slug' => 'slug',
+                ],
+                'left'
+            )
+            ->join(
+                ['i' => 'user_list'],
+                'a.user_id = i.user_id',
+                [
+                    'nick_name',
+                    'user_slug' => 'slug',
+                    'avatar'
                 ],
                 'left'
             )

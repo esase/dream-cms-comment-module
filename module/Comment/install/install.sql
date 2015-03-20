@@ -184,6 +184,37 @@ SET @widgetSettingId = (SELECT LAST_INSERT_ID());
 INSERT INTO `page_widget_setting_default_value` (`setting_id`, `value`, `language`) VALUES
 (@widgetSettingId, '450', NULL);
 
+INSERT INTO `page_widget` (`name`, `module`, `type`, `description`, `duplicate`, `forced_visibility`, `depend_page_id`) VALUES
+('commentLastCommentsWidget', @moduleId, 'public', 'Last comments', NULL, NULL, NULL);
+SET @widgetId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_widget_setting` (`name`, `widget`, `label`, `type`, `required`, `order`, `category`, `description`, `check`,  `check_message`, `values_provider`) VALUES
+('comment_count', @widgetId, 'Count of last comments', 'integer', 1, 1, @displaySettingCategoryId, NULL, 'return intval(''__value__'') > 0;', 'Value should be greater than 0', NULL);
+SET @widgetSettingId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_widget_setting_default_value` (`setting_id`, `value`, `language`) VALUES
+(@widgetSettingId, '5', NULL);
+
+INSERT INTO `page_widget_setting` (`name`, `widget`, `label`, `type`, `required`, `order`, `category`, `description`, `check`,  `check_message`, `values_provider`) VALUES
+('comment_visible_chars', @widgetId, 'Visible count of chars in comments', 'integer', 1, 2, @displaySettingCategoryId, NULL, 'return intval(''__value__'') > 0;', 'Value should be greater than 0', NULL);
+SET @widgetSettingId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_widget_setting_default_value` (`setting_id`, `value`, `language`) VALUES
+(@widgetSettingId, '450', NULL);
+
+INSERT INTO `page_system_widget_hidden` (`page_id`, `widget_id`) VALUES
+(2,  @widgetId),
+(3,  @widgetId),
+(4,  @widgetId),
+(5,  @widgetId),
+(6,  @widgetId),
+(7,  @widgetId),
+(8,  @widgetId),
+(9,  @widgetId),
+(11, @widgetId),
+(12, @widgetId),
+(13, @widgetId);
+
 -- module tables
 
 CREATE TABLE `comment_list` (

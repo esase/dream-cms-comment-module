@@ -583,6 +583,9 @@ function Comment(translationsList)
                 formUrl += "&widget_comment_id=" + commentId;
             }
 
+            // disable the submit button
+            $form.find("input[type=submit]").attr("disabled", true);
+ 
             // send a form data
             ajaxQuery($("#global-comments-wrapper #comments-list-wrapper"), formUrl, function(data) {
                 if (data) {
