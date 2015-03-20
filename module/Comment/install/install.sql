@@ -150,6 +150,13 @@ SET @widgetSettingId = (SELECT LAST_INSERT_ID());
 INSERT INTO `page_widget_setting_default_value` (`setting_id`, `value`, `language`) VALUES
 (@widgetSettingId, '1', NULL);
 
+INSERT INTO `page_widget_setting` (`name`, `widget`, `label`, `type`, `required`, `order`, `category`, `description`) VALUES
+('comment_show_thumbs', @widgetId, 'Show users thumbs', 'checkbox', NULL, 5, @displaySettingCategoryId, NULL);
+SET @widgetSettingId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_widget_setting_default_value` (`setting_id`, `value`, `language`) VALUES
+(@widgetSettingId, '1', NULL);
+
 INSERT INTO `page_system_widget_hidden` (`page_id`, `widget_id`) VALUES
 (2,  @widgetId),
 (3,  @widgetId),
@@ -201,6 +208,13 @@ SET @widgetSettingId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `page_widget_setting_default_value` (`setting_id`, `value`, `language`) VALUES
 (@widgetSettingId, '450', NULL);
+
+INSERT INTO `page_widget_setting` (`name`, `widget`, `label`, `type`, `required`, `order`, `category`, `description`) VALUES
+('comment_show_thumbs', @widgetId, 'Show users thumbs', 'checkbox', NULL, 5, @displaySettingCategoryId, NULL);
+SET @widgetSettingId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `page_widget_setting_default_value` (`setting_id`, `value`, `language`) VALUES
+(@widgetSettingId, '1', NULL);
 
 INSERT INTO `page_system_widget_hidden` (`page_id`, `widget_id`) VALUES
 (2,  @widgetId),

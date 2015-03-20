@@ -594,6 +594,7 @@ class CommentWidget extends AbstractCommentWidget
                 : $this->getModel()->getCommentModel()->getGuestId();
 
             $maxRepliesNestedLevel = (int) $this->getWidgetSetting('comment_max_nested_level');
+            $showUsersThumbs = (int) $this->getWidgetSetting('comment_show_thumbs');
 
             // process comments
             foreach ($comments as $comment) {
@@ -610,7 +611,8 @@ class CommentWidget extends AbstractCommentWidget
                     'user_slug' => $comment['registred_slug'],
                     'user_avatar' => $comment['registred_avatar'],
                     'created' => $comment['created'],
-                    'show_reply' => $comment['level'] <= $maxRepliesNestedLevel
+                    'show_reply' => $comment['level'] <= $maxRepliesNestedLevel,
+                    'show_thumbs' => $showUsersThumbs
                 ]);
 
                 // check for children

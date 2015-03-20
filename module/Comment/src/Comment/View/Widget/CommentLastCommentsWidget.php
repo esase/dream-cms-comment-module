@@ -36,7 +36,8 @@ class CommentLastCommentsWidget extends AbstractCommentWidget
                 AclService::checkPermission('comment_view');
 
                 return $this->getView()->partial('comment/widget/last-comments-list', [
-                    'visible_chars' => $this->getWidgetSetting('comment_visible_chars'),
+                    'visible_chars' => (int) $this->getWidgetSetting('comment_visible_chars'),
+                    'show_thumbs' => (int) $this->getWidgetSetting('comment_show_thumbs'),
                     'comments' => $comments
                 ]);
             }

@@ -12,19 +12,21 @@
         : null;
 ?>
 
-<div class="media<?php if (!$this->approved): ?> disapproved<?php else: ?> approved<?php endif ?><?php if ($this->own_comment): ?> own-comment<?php endif ?>" comment-id="<?php echo (int) $this->id ?>" comment-parent="<?php echo (int) $this->parent_id ?>">
+<li class="media<?php if (!$this->approved): ?> disapproved<?php else: ?> approved<?php endif ?><?php if ($this->own_comment): ?> own-comment<?php endif ?>" comment-id="<?php echo (int) $this->id ?>" comment-parent="<?php echo (int) $this->parent_id ?>">
     <a name="comment-<?php echo (int) $this->id ?>"></a>
-    <div class="media-left">
-        <?php if ($this->commenterUrl): ?>
-            <a href="<?php echo $this->commenterUrl ?>" class="thumbnail">
-                <img alt="<?php echo $this->escapeHtmlAttr($this->commenterName) ?>" class="media-object" src="<?php echo $this->userAvatarUrl($this->user_avatar) ?>" />
-            </a>
-        <?php else: ?>
-            <div class="thumbnail">
-                <img alt="<?php echo $this->escapeHtmlAttr($this->commenterName) ?>" class="media-object" src="<?php echo $this->userAvatarUrl($this->user_avatar) ?>" />
-            </div>
-        <?php endif ?>
-    </div>
+    <?php if ($this->show_thumbs): ?>
+        <div class="media-left">
+            <?php if ($this->commenterUrl): ?>
+                <a href="<?php echo $this->commenterUrl ?>" class="thumbnail">
+                    <img alt="<?php echo $this->escapeHtmlAttr($this->commenterName) ?>" class="media-object" src="<?php echo $this->userAvatarUrl($this->user_avatar) ?>" />
+                </a>
+            <?php else: ?>
+                <div class="thumbnail">
+                    <img alt="<?php echo $this->escapeHtmlAttr($this->commenterName) ?>" class="media-object" src="<?php echo $this->userAvatarUrl($this->user_avatar) ?>" />
+                </div>
+            <?php endif ?>
+        </div>
+    <?php endif ?>
     <div class="media-body">
         <div class="owner">
             <?php if ($this->commenterUrl): ?>
@@ -62,4 +64,4 @@
                 <p class="reply-comment"><a href="#"><?php echo $this->translate('Reply') ?></a></p>
             <?php endif ?>
         </div>
-        <div class="comment-replies">
+        <ul class="comment-replies">
