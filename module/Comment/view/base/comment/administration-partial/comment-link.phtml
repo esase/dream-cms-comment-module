@@ -1,0 +1,10 @@
+<?php $this->declareVars('commentPage') ?>
+<?php $this->commentPage = $this->pageUrl($this->page_slug, [], null, false, $this->slug) ?>
+
+<?php if (false !== $this->commentPage): ?>
+    <a target="_blank" href="<?php echo $this->url('page', ['page_name' => $this->commentPage, 'slug' => $this->slug], ['force_canonical' => true]) ?>#comment-<?php echo (int) $this->id ?>">
+        <?php echo $this->escapeHtml($this->comment) ?>
+    </a>
+<?php else: ?>
+    <?php echo $this->escapeHtml($this->comment) ?>
+<?php endif ?>

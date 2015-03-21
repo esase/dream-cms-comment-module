@@ -2,7 +2,27 @@ SET sql_mode='STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE';
 
 SET @moduleId = __module_id__;
 
+-- application admin menu
+
+SET @maxOrder = (SELECT `order` + 1 FROM `application_admin_menu` ORDER BY `order` DESC LIMIT 1);
+
+INSERT INTO `application_admin_menu_category` (`name`, `module`, `icon`) VALUES
+('Comment', @moduleId, 'comment_menu_item.png');
+
+SET @menuCategoryId = (SELECT LAST_INSERT_ID());
+SET @menuPartId = (SELECT `id` from `application_admin_menu_part` where `name` = 'Modules');
+
+INSERT INTO `application_admin_menu` (`name`, `controller`, `action`, `module`, `order`, `category`, `part`) VALUES
+('List of comments', 'comments-administration', 'list', @moduleId, @maxOrder, @menuCategoryId, @menuPartId),
+('List of spam IPs', 'comments-administration', 'list-spam-ips', @moduleId, @maxOrder + 1, @menuCategoryId, @menuPartId),
+('Settings', 'comments-administration', 'settings', @moduleId, @maxOrder + 2, @menuCategoryId, @menuPartId);
+
 -- acl resources
+
+INSERT INTO `acl_resource` (`resource`, `description`, `module`) VALUES
+('comments_administration_list', 'ACL - Viewing comments in admin area', @moduleId),
+('comments_administration_list_spam_ips', 'ACL - Viewing comments spam IPs in admin area', @moduleId),
+('comments_administration_settings', 'ACL - Editing comments settings in admin area', @moduleId);
 
 INSERT INTO `acl_resource` (`resource`, `description`, `module`) VALUES
 ('comment_view', 'ACL - Viewing comments', @moduleId);
@@ -65,6 +85,13 @@ SET @settingId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
 (@settingId, '1', NULL);
+
+INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
+('comments_length_in_admin', 'Visible count of comments chars in admin menu', NULL, 'integer', 1, 2, @settingsCategoryId, @moduleId, NULL, NULL, 'return intval(''__value__'') > 0;', 'Value should be greater than 0');
+SET @settingId = (SELECT LAST_INSERT_ID());
+
+INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
+(@settingId, '250', NULL);
 
 INSERT INTO `application_setting_category` (`name`, `module`) VALUES
 ('Email notifications', @moduleId);

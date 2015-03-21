@@ -3,6 +3,7 @@
 return [
     'controllers' => [
         'invokables' => [
+            'comments-administration' => 'Comment\Controller\CommentAdministrationController'
         ]
     ],
     'router' => [

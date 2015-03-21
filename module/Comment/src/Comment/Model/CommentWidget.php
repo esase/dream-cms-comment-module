@@ -62,6 +62,7 @@ class CommentWidget extends CommentBase
                 'created',
                 'slug',
                 'guest_name' => 'name',
+                'guest_id',
                 'user_id'
             ])
             ->join(
@@ -76,6 +77,7 @@ class CommentWidget extends CommentBase
                 'c.id = a.parent_id',
                 [
                     'reply_id' => 'id',
+                    'reply_guest_id' => 'guest_id',
                     'reply_guest_name' => 'name',
                     'reply_user_id' => 'user_id'
                 ],

@@ -441,30 +441,7 @@ class CommentWidget extends AbstractCommentWidget
      * @return string|boolean
      */
     public function getContent() 
-    {//return false;
-        // TODO:
-        // 1.Show empty block +
-        // 2. Test with disapprove.+
-        // 4. Test ACL AGAIN! +
-        // 5. Add notification about new messages.+
-        // 6. TEST comments on different pages +
-        // 7. Store ip +
-        // 8 . Store email+
-        //10. DON't show access denied for absent comments (approve function)! +
-        // 12. Add a confirm block for delete links +
-        // 13. You need to get correct lastComment id after deleting +
-        // 9. Edit comments +
-        // 14. Show only small part of comment if it long +
-        // 17. Messages stay innactive when you edit message and they become active +
-        //17. Allow all delete and edit own comments+
-        //11. Send reply on email+
-        //15 . Edit doesnt work if add comments disallowed +
-        // 16. Mark as a SPAM +
-        // 18. Max nested reply level+
-        
-        // 19.Last comments widgets
-        // 20. Don't show comments widgets on special pages like:404, dashboard etc
-        // 21 . Delete comments when some page's object deleted
+    {
         if (AclService::checkPermission('comment_view', false)) {
             // is approve allowing
             $allowApprove = AclService::checkPermission('comment_approve', false);
@@ -605,8 +582,9 @@ class CommentWidget extends AbstractCommentWidget
                     'approved' => $comment['active'] == CommentNestedSet::COMMENT_STATUS_ACTIVE,
                     'own_comment' => $userId == $comment['user_id'] || $userId == $comment['guest_id'],
                     'visible_chars' => (int) $this->getWidgetSetting('comment_visible_chars'),
-                    'nick_name' => $comment['registred_nickname'],
-                    'guest_name' => $comment['name'],
+                    'registred_nickname' => $comment['registred_nickname'],
+                    'guest_id' => $comment['guest_id'],
+                    'name' => $comment['name'],
                     'user_id' => $comment['user_id'],
                     'user_slug' => $comment['registred_slug'],
                     'user_avatar' => $comment['registred_avatar'],

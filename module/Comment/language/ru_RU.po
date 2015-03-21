@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Dream CMS \"comment\" module\n"
 "POT-Creation-Date: 2013-07-19 11:59+0600\n"
-"PO-Revision-Date: 2015-03-20 15:13+0600\n"
+"PO-Revision-Date: 2015-03-21 18:25+0600\n"
 "Last-Translator: AlexE <alexermashev@gmail.com>\n"
 "Language-Team: \n"
 "Language: Русский\n"
@@ -15,6 +15,18 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "Visible count of comments chars in admin menu"
+msgstr "Видимое количество символов комментариев в админке"
+
+msgid "Commenter name"
+msgstr "Имя"
+
+msgid "List of comments"
+msgstr "Список комментариев"
+
+msgid "List of spam IPs"
+msgstr "Список спам IP-адресов"
 
 msgid "Show users thumbs"
 msgstr "Отображать миниатюры пользователей"
@@ -201,3 +213,12 @@ msgstr "Редактирование собственных комментари
 
 msgid "ACL - Marking comments as spam"
 msgstr "Маркировка комментариев как спам"
+
+msgid "ACL - Editing comments settings in admin area"
+msgstr "Редактирование настроек комментариев в админке"
+
+msgid "ACL - Viewing comments spam IPs in admin area"
+msgstr "Просмотр спам IP-адресов комментариев в админке"
+
+msgid "ACL - Viewing comments in admin area"
+msgstr "Просмотр комментариев в админке"

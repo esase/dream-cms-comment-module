@@ -1,3 +1,7 @@
+div#user-last-comments .media,
+div#last-comments .media {
+  overflow: hidden;
+}
 div#user-last-comments .media .media-left,
 div#last-comments .media .media-left {
   min-width: 52px;

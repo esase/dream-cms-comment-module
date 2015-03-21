@@ -9,9 +9,12 @@
                     <?php if ($comment->reply_id): ?>
                         <?php echo $this->translate('Reply to') ?>:
                         <?php 
-                            $this->commenterName = $comment->reply_guest_name && !$comment->reply_user_id
-                                ? $comment->reply_guest_name
-                                : ($comment->reply_nickname ? $comment->reply_nickname : $this->translate('guest'));
+                            $this->commenterName = $this->commentCommenterName([
+                                'guest_id' => $comment->reply_guest_id,
+                                'name' => $comment->reply_guest_name,
+                                'registred_nickname' => $comment->reply_nickname,
+                                'user_id' => $comment->reply_user_id
+                            ]);
 
                             $this->commenterUrl = $comment->reply_user_id && false !== $this->userPage
                                 ? $this->url('page', ['page_name' => $this->userPage, 'slug' => $comment->reply_slug], ['force_canonical' => true])

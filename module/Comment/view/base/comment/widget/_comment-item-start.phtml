@@ -2,10 +2,7 @@
 
 <?php 
     $this->userPage = $this->pageUrl('user', [], null, true);
-
-    $this->commenterName = $this->guest_name && !$this->user_id
-        ? $this->guest_name
-        : ($this->nick_name ? $this->nick_name : $this->translate('guest'));
+    $this->commenterName = $this->commentCommenterName($this->vars());
 
     $this->commenterUrl = $this->user_id && false !== $this->userPage
         ? $this->url('page', ['page_name' => $this->userPage, 'slug' => $this->user_slug], ['force_canonical' => true])

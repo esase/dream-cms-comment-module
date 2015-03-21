@@ -4,10 +4,13 @@
 <div id="user-last-comments">
     <?php foreach($this->comments as $comment): ?>
          <div class="media">
-            <?php 
-                $this->commenterName = $comment->guest_name && !$comment->user_id
-                    ? $comment->guest_name
-                    : ($comment->nick_name ? $comment->nick_name : $this->translate('guest'));
+            <?php
+                $this->commenterName = $this->commentCommenterName([
+                    'guest_id' => $comment->guest_id,
+                    'name' => $comment->guest_name,
+                    'registred_nickname' => $comment->nick_name,
+                    'user_id' => $comment->user_id
+                ]);
 
                 $this->commenterUrl = $comment->user_id && false !== $this->userPage
                     ? $this->url('page', ['page_name' => $this->userPage, 'slug' => $comment->user_slug], ['force_canonical' => true])
@@ -38,10 +41,13 @@
 
                     <?php if ($comment->reply_id): ?>
                         (<?php echo $this->translate('Reply to') ?>:
-                        <?php 
-                            $this->replyCommenterName = $comment->reply_guest_name && !$comment->reply_user_id
-                                ? $comment->reply_guest_name
-                                : ($comment->reply_nickname ? $comment->reply_nickname : $this->translate('guest'));
+                        <?php
+                            $this->replyCommenterName = $this->commentCommenterName([
+                                'guest_id' => $comment->reply_guest_id,
+                                'name' => $comment->reply_guest_name,
+                                'registred_nickname' => $comment->reply_nickname,
+                                'user_id' => $comment->reply_user_id
+                            ]);
 
                             $this->replyCommenterUrl = $comment->reply_user_id && false !== $this->userPage
                                 ? $this->url('page', ['page_name' => $this->userPage, 'slug' => $comment->reply_slug], ['force_canonical' => true])

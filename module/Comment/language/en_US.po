@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Dream CMS \"comment\" module\n"
 "POT-Creation-Date: 2013-07-19 11:59+0600\n"
-"PO-Revision-Date: 2015-03-20 15:14+0600\n"
+"PO-Revision-Date: 2015-03-21 18:25+0600\n"
 "Last-Translator: AlexE <alexermashev@gmail.com>\n"
 "Language-Team: \n"
 "Language: English\n"
@@ -14,6 +14,18 @@ msgstr ""
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Visible count of comments chars in admin menu"
+msgstr "Visible count of comments chars in admin menu"
+
+msgid "Commenter name"
+msgstr "Name"
+
+msgid "List of comments"
+msgstr "List of comments"
+
+msgid "List of spam IPs"
+msgstr "List of spam IPs"
 
 msgid "Show users thumbs"
 msgstr "Show users thumbs"
@@ -200,3 +212,12 @@ msgstr "Editing own comments"
 
 msgid "ACL - Marking comments as spam"
 msgstr "Marking comments as spam"
+
+msgid "ACL - Editing comments settings in admin area"
+msgstr "Editing comments settings in admin area"
+
+msgid "ACL - Viewing comments spam IPs in admin area"
+msgstr "Viewing comments spam IPs in admin area"
+
+msgid "ACL - Viewing comments in admin area"
+msgstr "Viewing comments in admin area"
