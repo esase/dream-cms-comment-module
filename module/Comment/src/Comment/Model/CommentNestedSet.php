@@ -221,11 +221,12 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
      * @param integer $id
      * @param integer $pageId
      * @param string $slug
+     * @param string $language
      * @return array|boolean
      */
-    public function getCommentInfo($id, $pageId, $slug = null)
+    public function getCommentInfo($id, $pageId = null, $slug = null, $language = null)
     {
-        return $this->getNodeInfo($id, null, function (Select $select) use ($pageId, $slug) {
+        return $this->getNodeInfo($id, null, function (Select $select) use ($pageId, $slug, $language) {            
             $select->join(
                 ['b' => 'user_list'],
                 'b.user_id = ' . $this->tableGateway->table . '.user_id', 
@@ -237,10 +238,25 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
                     'registred_language' => 'language'
                 ],
                 'left'
-            )->where([
-                $this->tableGateway->table . '.page_id' => $pageId,
-                $this->tableGateway->table . '.slug' => $slug
-            ]);
+            );
+
+            if ($pageId) {
+                $select->where([
+                    $this->tableGateway->table . '.page_id' => $pageId
+                ]);
+            }
+
+            if ($slug) {
+                $select->where([
+                    $this->tableGateway->table . '.slug' => $slug
+                ]);
+            }
+
+            if ($language) {
+                $select->where([
+                    $this->tableGateway->table . '.language' => $language
+                ]);
+            }
 
             return $select;
         });
@@ -343,13 +359,11 @@ class CommentNestedSet extends ApplicationAbstractNestedSet
      * @param array $basicData
      *      integer active
      *      string comment
-     *      string name
-     *      string email
-     * @param integer $pageId
-     * @param string $slug
+     *      string name optional
+     *      string email optional
      * @return array|string
      */
-    public function editComment($commentInfo, array $basicData, $pageId, $slug = null)
+    public function editComment($commentInfo, array $basicData)
     {
         try {
             $this->tableGateway->getAdapter()->getDriver()->getConnection()->beginTransaction();

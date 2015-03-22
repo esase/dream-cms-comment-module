@@ -323,8 +323,7 @@ class CommentWidget extends AbstractCommentWidget
                             'email' => !empty($formData['email']) ? $formData['email'] : $commentInfo['email'] 
                         ];
 
-                        $commentInfo = $this->getModel()->
-                            getCommentModel()->editComment($commentInfo, $basicData, $this->pageId, $this->getPageSlug());
+                        $commentInfo = $this->getModel()->getCommentModel()->editComment($commentInfo, $basicData);
 
                         // return a status
                         if (is_array($commentInfo)) {

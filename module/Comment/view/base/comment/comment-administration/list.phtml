@@ -19,6 +19,7 @@
     'per_page' => $this->per_page,
     'default_order' => 'created',
     'default_order_type' => 'desc',
+    'filter_form' => $this->filter_form,
     'headers' => [
         [
             'title' => $this->translate('ID'),
@@ -79,6 +80,34 @@
                 'controller' => 'comments-administration',
                 'action' => 'ajax-view-comment',
                 'image' => $this->layoutAsset('icon/view_comment_action.png', 'image', 'comment')
+            ],
+            [
+                'name' => $this->translate('Edit the comment'),
+                'controller' => 'comments-administration',
+                'action' => 'edit-comment',
+                'check_acl' => true,
+                'image' => $this->layoutAsset('icon/edit_action.png', 'image')
+            ]
+        ],
+        'multiple_actions' => [
+            [
+                'name' => $this->translate('Approve selected'),
+                'controller' => 'comments-administration',
+                'action' => 'approve-comments',
+                'check_acl' => true
+            ],
+            [
+                'name' => $this->translate('Disapprove selected'),
+                'controller' => 'comments-administration',
+                'action' => 'disapprove-comments',
+                'check_acl' => true
+            ],
+            [
+                'name' => $this->translate('Delete selected'),
+                'controller' => 'comments-administration',
+                'action' => 'delete-comments',
+                'check_acl' => true,
+                'confirm' => $this->translate('Selected comments with their replies will be deleted. Are you sure?')
             ]
         ]
     ],
@@ -86,7 +115,7 @@
         'action_identity' => 'id',
         'form_name' => 'comments',
         'multiple_actions' => [
-            'items_name' => 'commets[]'
+            'items_name' => 'comments[]'
         ]
     ],
     'actions_extra_check' => [
@@ -98,7 +127,7 @@
             'ajax-view-comment' => [
                 [
                     'param' => 'comment',
-                    'condition' =>  'return mb_strlen("__value__") > 20;'
+                    'condition' =>  'return mb_strlen(stripslashes("__value__")) > Application\Service\ApplicationSetting::getSetting(\'comments_length_in_admin\');'
                 ]
             ]
         ]

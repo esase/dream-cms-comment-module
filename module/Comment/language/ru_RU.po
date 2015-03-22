@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Dream CMS \"comment\" module\n"
 "POT-Creation-Date: 2013-07-19 11:59+0600\n"
-"PO-Revision-Date: 2015-03-21 18:25+0600\n"
+"PO-Revision-Date: 2015-03-22 16:19+0600\n"
 "Last-Translator: AlexE <alexermashev@gmail.com>\n"
 "Language-Team: \n"
 "Language: Русский\n"
@@ -15,6 +15,66 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "Page name"
+msgstr "Название страницы"
+
+msgid "Page slug"
+msgstr "Отображаемое имя страницы"
+
+msgid "Date end"
+msgstr "Дата окончания"
+
+msgid "Date start"
+msgstr "Дата начала"
+
+msgid "Comment will be disapproved. Are you sure?"
+msgstr "Комментарий будет дезактивирован. Вы уверены?"
+
+msgid "Disapprove the comment"
+msgstr "Дезактивировать комментарий"
+
+msgid "Comment will be approved. Are you sure?"
+msgstr "Комментарий будет активирован. Вы уверены?"
+
+msgid "Approve the comment"
+msgstr "Активировать комментарий"
+
+msgid "Comment will be deleted with his replies. Are you sure?"
+msgstr "Комментарий будет удален со своими ответами. Вы уверены?"
+
+msgid "Delete the comment"
+msgstr "Удалить комментарий"
+
+msgid "Comment has been edited"
+msgstr "Комментарий был отредактирован"
+
+msgid "Edit the comment"
+msgstr "Редактировать комментарий"
+
+msgid "The selected comment has been disapproved"
+msgstr "Выбранный комментарий был дезактивирован"
+
+msgid "Selected comments have been disapproved"
+msgstr "Выбранные комментарии были дезактивированы"
+
+msgid "The selected comment has been approved"
+msgstr "Выбранный комментарий был активирован"
+
+msgid "Selected comments have been approved"
+msgstr "Выбранные комментарии были активированы"
+
+msgid "The selected comment has been deleted"
+msgstr "Выбранный комментарий был удален"
+
+msgid "Selected comments have been deleted"
+msgstr "Выбранные комментарии были удалены"
+
+msgid "Selected comments with their replies will be deleted. Are you sure?"
+msgstr "Выбранные комментарии с их ответами будут удалены. Вы уверены?"
+
+msgid "View full comment"
+msgstr "Посмотреть полный комментарий"
 
 msgid "Visible count of comments chars in admin menu"
 msgstr "Видимое количество символов комментариев в админке"
@@ -222,3 +282,18 @@ msgstr "Просмотр спам IP-адресов комментариев в 
 
 msgid "ACL - Viewing comments in admin area"
 msgstr "Просмотр комментариев в админке"
+
+msgid "ACL - Viewing full comments details in admin area"
+msgstr "Просмотр подробностей комментариев в админке"
+
+msgid "ACL - Deleting comments in admin area"
+msgstr "Удаление комментариев в админке"
+
+msgid "ACL - Approving comments in admin area"
+msgstr "Активация комментариев в админке"
+
+msgid "ACL - Disapproving comments in admin area"
+msgstr "Дезактивирование комментариев в админке"
+
+msgid "ACL - Editing comments in admin area"
+msgstr "Редактирование комментариев в админке"

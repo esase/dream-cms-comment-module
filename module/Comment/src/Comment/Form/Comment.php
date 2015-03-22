@@ -31,15 +31,27 @@ class Comment extends ApplicationAbstractCustomForm
 
     /**
      * Captcha enabled status
-     * @va boolean
+     * @var boolean
      */
     protected $captchaEnabled = true;
+
+    /**
+     * Validate spam ip
+     * var boolean
+     */
+    protected $validateSpamIp = true;
 
     /**
      * Guest mode
      * @var boolean
      */
     protected $guestMode = true;
+
+    /**
+     * Model
+     * @var object
+     */
+    protected $model;
 
     /**
      * Form elements
@@ -102,15 +114,17 @@ class Comment extends ApplicationAbstractCustomForm
             }
 
             // check for spam
-            $this->formElements['comment']['validators'] = [
-                [
-                    'name' => 'callback',
-                    'options' => [
-                        'callback' => [$this, 'validateSpamIp'],
-                        'message' => 'Your IP address blocked'
+            if ($this->validateSpamIp) {
+                $this->formElements['comment']['validators'] = [
+                    [
+                        'name' => 'callback',
+                        'options' => [
+                            'callback' => [$this, 'validateSpamIp'],
+                            'message' => 'Your IP address blocked'
+                        ]
                     ]
-                ]
-            ];
+                ];
+            }
 
             $this->form = new ApplicationCustomFormBuilder($this->formName,
                     $this->formElements, $this->translator, $this->ignoredElements, $this->notValidatedElements, $this->method);    
@@ -152,6 +166,18 @@ class Comment extends ApplicationAbstractCustomForm
     public function setModel(CommentBaseModel $model)
     {
         $this->model = $model;
+        return $this;
+    }
+
+    /**
+     * Enable spam validation
+     *
+     * @param boolean $enable
+     * @return object fluent interface
+     */
+    public function enableSpamValidation($enable)
+    {
+        $this->validateSpamIp = $enable;
         return $this;
     }
 
