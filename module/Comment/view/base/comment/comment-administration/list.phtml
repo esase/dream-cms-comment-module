@@ -127,7 +127,7 @@
             'ajax-view-comment' => [
                 [
                     'param' => 'comment',
-                    'condition' =>  'return mb_strlen(stripslashes("__value__")) > Application\Service\ApplicationSetting::getSetting(\'comments_length_in_admin\');'
+                    'condition' =>  'return mb_strlen(stripslashes("__value__")) > (int) Application\Service\ApplicationSetting::getSetting(\'comment_length_in_admin\');'
                 ]
             ]
         ]
