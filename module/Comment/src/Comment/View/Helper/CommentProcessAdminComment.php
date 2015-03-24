@@ -18,7 +18,7 @@ class CommentProcessAdminComment extends AbstractHelper
      */
     public function __invoke($comment)
     {
-        $maxLength = (int) ApplicationSettingService::getSetting('comments_length_in_admin');
+        $maxLength = (int) ApplicationSettingService::getSetting('comment_length_in_admin');
 
         $processedComment = mb_strlen($comment['comment']) > $maxLength
             ? mb_substr($comment['comment'], 0, $maxLength) . '...'

@@ -215,7 +215,7 @@ class CommentWidget extends AbstractCommentWidget
                 $formData = $commentForm->getForm()->getData();
 
                 // get comment's status
-                $commentActive = $allowApprove || (int) $this->getSetting('comments_auto_approve');
+                $commentActive = $allowApprove || (int) $this->getSetting('comment_auto_approve');
                 $maxNestedLevel = (int) $this->getWidgetSetting('comment_max_nested_level');
 
                 // collect basic data
@@ -312,7 +312,7 @@ class CommentWidget extends AbstractCommentWidget
                         // get the comment's status
                         $commentStatus = $allowApprove
                             ? $commentInfo['active'] // use the old value
-                            : ((int) $this->getSetting('comments_auto_approve')
+                            : ((int) $this->getSetting('comment_auto_approve')
                                 ? CommentNestedSet::COMMENT_STATUS_ACTIVE : CommentNestedSet::COMMENT_STATUS_NOT_ACTIVE);
 
                         // collect basic data

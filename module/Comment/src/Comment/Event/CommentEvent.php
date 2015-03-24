@@ -36,32 +36,6 @@ class CommentEvent extends ApplicationAbstractEvent
     const EDIT_COMMENT = 'comment_edit';
 
     /**
-     * Add comment spam IP event
-     */
-    const ADD_COMMENT_SPAM_IP = 'comment_add_spam_ip';
-
-    /**
-     * Fire add comment spam IP event
-     *
-     * @param $commentId
-     * @return void
-     */
-    public static function fireAddCommentSpamIpEvent($spamId)
-    {
-        // event's description
-        $eventDesc = UserIdentityService::isGuest()
-            ? 'Event - Comment spam ip added by guest'
-            : 'Event - Comment spam ip added by user';
-
-        $eventDescParams = UserIdentityService::isGuest()
-            ? [$spamId]
-            : [UserIdentityService::getCurrentUserIdentity()['nick_name'], $spamId];
-
-        self::fireEvent(self::ADD_COMMENT_SPAM_IP, 
-                $spamId, UserIdentityService::getCurrentUserIdentity()['user_id'], $eventDesc, $eventDescParams);
-    }
-
-    /**
      * Fire edit comment event
      *
      * @param $commentId

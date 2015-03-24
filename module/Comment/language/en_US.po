@@ -195,15 +195,6 @@ msgstr "Module allows to publish comments on the site"
 msgid "Comment"
 msgstr "Comment"
 
-msgid "Event - Adding comments spam IP"
-msgstr "Adding comments spam IP"
-
-msgid "Event - Comment spam ip added by guest"
-msgstr "Guest added the comment spam IP with id - \"%d\""
-
-msgid "Event - Comment spam ip added by user"
-msgstr "\"%s\" added the comment spam IP with id - \"%d\""
-
 msgid "Event - Editing comments"
 msgstr "Editing comments"
 
@@ -278,9 +269,6 @@ msgstr "Marking comments as spam"
 
 msgid "ACL - Editing comments settings in admin area"
 msgstr "Editing comments settings in admin area"
-
-msgid "ACL - Viewing comments spam IPs in admin area"
-msgstr "Viewing comments spam IPs in admin area"
 
 msgid "ACL - Viewing comments in admin area"
 msgstr "Viewing comments in admin area"

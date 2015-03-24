@@ -1,11 +1,8 @@
 <?php
 namespace Comment\Model;
 
-use Comment\Event\CommentEvent;
+use Application\Service\ApplicationSetting as ApplicationSettingService;
 use Application\Model\ApplicationAbstractBase;
-use Application\Utility\ApplicationErrorLogger;
-use Zend\Db\ResultSet\ResultSet;
-use Exception;
 
 class CommentBase extends ApplicationAbstractBase
 {
@@ -35,20 +32,18 @@ class CommentBase extends ApplicationAbstractBase
      */
     public function isSpamIp($ip)
     {
-        $select = $this->select();
-        $select->from('comment_spam_ip')
-            ->columns([
-                'id'
-            ])
-            ->where([
-                'ip' => inet_pton($ip)
-            ]);
+        return in_array($ip, $this->getSpamIps());
+    }
 
-        $statement = $this->prepareStatementForSqlObject($select);
-        $resultSet = new ResultSet;
-        $resultSet->initialize($statement->execute());
-
-        return $resultSet->current() ? true : false;
+    /**
+     * Get spam Ips
+     * 
+     * @return array
+     */
+    protected function getSpamIps()
+    {
+        $spamIps = trim(ApplicationSettingService::getSetting('comment_spam_ips'));
+        return $spamIps ? explode(',', $spamIps) : [];
     }
 
     /**
@@ -59,31 +54,22 @@ class CommentBase extends ApplicationAbstractBase
      */
     public function spamComment($ip)
     {
-        if (!$this->isSpamIp($ip)) {
-            try {
-                $this->adapter->getDriver()->getConnection()->beginTransaction();
+        $currentIpsList = $this->getSpamIps();
 
-                $insert = $this->insert()
-                    ->into('comment_spam_ip')
-                    ->values([
-                        'ip' => inet_pton($ip)
-                    ]);
+        if (!in_array($ip, $currentIpsList)) {
+            $moduleName = 'comment';
 
-                $statement = $this->prepareStatementForSqlObject($insert);
-                $statement->execute();
-                $insertId = $this->adapter->getDriver()->getLastGeneratedValue();
+            // get all module's settings
+            $settings = $this->serviceLocator
+                ->get('Application\Model\ModelManager')
+                ->getInstance('Application\Model\ApplicationSettingAdministration');
 
-                $this->adapter->getDriver()->getConnection()->commit();
-            }
-            catch (Exception $e) {
-                $this->adapter->getDriver()->getConnection()->rollback();
-                ApplicationErrorLogger::log($e);
+            $settingsList = $settings->getSettingsList($moduleName, $this->getCurrentLanguage());
+            $newIpsList   = implode(',', array_merge($currentIpsList, [$ip]));
 
-                return $e->getMessage();
-            }
-
-            // fire the add comment spam IP event
-            CommentEvent::fireAddCommentSpamIpEvent($insertId);
+            $settings->saveSettings($settingsList, [
+                'comment_spam_ips' => $newIpsList
+            ], $this->getCurrentLanguage(), $moduleName);
         }
 
         return true;

@@ -14,14 +14,12 @@ SET @menuPartId = (SELECT `id` from `application_admin_menu_part` where `name` =
 
 INSERT INTO `application_admin_menu` (`name`, `controller`, `action`, `module`, `order`, `category`, `part`) VALUES
 ('List of comments', 'comments-administration', 'list', @moduleId, @maxOrder, @menuCategoryId, @menuPartId),
-('List of spam IPs', 'comments-administration', 'list-spam-ips', @moduleId, @maxOrder + 1, @menuCategoryId, @menuPartId),
 ('Settings', 'comments-administration', 'settings', @moduleId, @maxOrder + 2, @menuCategoryId, @menuPartId);
 
 -- acl resources
 
 INSERT INTO `acl_resource` (`resource`, `description`, `module`) VALUES
 ('comments_administration_list', 'ACL - Viewing comments in admin area', @moduleId),
-('comments_administration_list_spam_ips', 'ACL - Viewing comments spam IPs in admin area', @moduleId),
 ('comments_administration_settings', 'ACL - Editing comments settings in admin area', @moduleId),
 ('comments_administration_ajax_view_comment', 'ACL - Viewing full comments details in admin area', @moduleId),
 ('comments_administration_delete_comments', 'ACL - Deleting comments in admin area', @moduleId),
@@ -75,8 +73,7 @@ INSERT INTO `application_event` (`name`, `module`, `description`) VALUES
 ('comment_approve', @moduleId, 'Event - Approving comments'),
 ('comment_disapprove', @moduleId, 'Event - Disapproving comments'),
 ('comment_delete', @moduleId, 'Event - Deleting comments'),
-('comment_edit', @moduleId, 'Event - Editing comments'),
-('comment_add_spam_ip', @moduleId, 'Event - Adding comments spam IP');
+('comment_edit', @moduleId, 'Event - Editing comments');
 
 -- application settings
 
@@ -85,32 +82,36 @@ INSERT INTO `application_setting_category` (`name`, `module`) VALUES
 SET @settingsCategoryId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
-('comments_auto_approve', 'Comments auto approve', NULL, 'checkbox', NULL, 1, @settingsCategoryId, @moduleId, NULL, NULL, NULL, NULL);
+('comment_auto_approve', 'Comments auto approve', NULL, 'checkbox', NULL, 1, @settingsCategoryId, @moduleId, NULL, NULL, NULL, NULL);
 SET @settingId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
 (@settingId, '1', NULL);
 
 INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
-('comments_length_in_admin', 'Visible count of comments chars in admin menu', NULL, 'integer', 1, 2, @settingsCategoryId, @moduleId, NULL, NULL, 'return intval(''__value__'') > 0;', 'Value should be greater than 0');
+('comment_length_in_admin', 'Visible count of comments chars in admin menu', NULL, 'integer', 1, 2, @settingsCategoryId, @moduleId, NULL, NULL, 'return intval(''__value__'') > 0;', 'Value should be greater than 0');
 SET @settingId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
 (@settingId, '250', NULL);
+
+INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
+('comment_spam_ips', 'List of spam IPs', 'You should separate values by a comma', 'textarea', NULL, 3, @settingsCategoryId, @moduleId, NULL, NULL, NULL, NULL);
+SET @settingId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `application_setting_category` (`name`, `module`) VALUES
 ('Email notifications', @moduleId);
 SET @settingsCategoryId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
-('comment_added_send', 'Send notifications about new comments', NULL, 'checkbox', NULL, 3, @settingsCategoryId, @moduleId, NULL, NULL, NULL, NULL);
+('comment_added_send', 'Send notifications about new comments', NULL, 'checkbox', NULL, 4, @settingsCategoryId, @moduleId, NULL, NULL, NULL, NULL);
 SET @settingId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
 (@settingId, '1', NULL);
 
 INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
-('comment_added_title', 'Comment added title', 'A comment add notification', 'notification_title', 1, 4, @settingsCategoryId, @moduleId, 1, NULL, NULL, NULL);
+('comment_added_title', 'Comment added title', 'A comment add notification', 'notification_title', 1, 5, @settingsCategoryId, @moduleId, 1, NULL, NULL, NULL);
 SET @settingId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
@@ -118,7 +119,7 @@ INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALU
 (@settingId, 'Новый комментарий на странице', 'ru');
 
 INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
-('comment_added_message', 'Comment added message', NULL, 'notification_message', 1, 5, @settingsCategoryId, @moduleId, 1, NULL, NULL, NULL);
+('comment_added_message', 'Comment added message', NULL, 'notification_message', 1, 6, @settingsCategoryId, @moduleId, 1, NULL, NULL, NULL);
 SET @settingId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
@@ -126,14 +127,14 @@ INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALU
 (@settingId, '<p><b>__PosterName__ (__PosterEmail__):</b></p><p><a href="__CommentUrl__#comment-__CommentId__">__Comment__</a></p><p>__Date__</p>', 'ru');
 
 INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
-('comment_reply_send', 'Send notifications about new replies', NULL, 'checkbox', NULL, 6, @settingsCategoryId, @moduleId, NULL, NULL, NULL, NULL);
+('comment_reply_send', 'Send notifications about new replies', NULL, 'checkbox', NULL, 7, @settingsCategoryId, @moduleId, NULL, NULL, NULL, NULL);
 SET @settingId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
 (@settingId, '1', NULL);
 
 INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
-('comment_reply_title', 'Comment reply title', 'A comment reply notification', 'notification_title', 1, 7, @settingsCategoryId, @moduleId, 1, NULL, NULL, NULL);
+('comment_reply_title', 'Comment reply title', 'A comment reply notification', 'notification_title', 1, 8, @settingsCategoryId, @moduleId, 1, NULL, NULL, NULL);
 SET @settingId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
@@ -141,7 +142,7 @@ INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALU
 (@settingId, 'У вас есть новый ответ', 'ru');
 
 INSERT INTO `application_setting` (`name`, `label`, `description`, `type`, `required`, `order`, `category`, `module`, `language_sensitive`, `values_provider`, `check`, `check_message`) VALUES
-('comment_reply_message', 'Comment reply message', NULL, 'notification_message', 1, 8, @settingsCategoryId, @moduleId, 1, NULL, NULL, NULL);
+('comment_reply_message', 'Comment reply message', NULL, 'notification_message', 1, 9, @settingsCategoryId, @moduleId, 1, NULL, NULL, NULL);
 SET @settingId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `application_setting_value` (`setting_id`, `value`, `language`) VALUES
@@ -294,11 +295,4 @@ CREATE TABLE `comment_list` (
     FOREIGN KEY (`language`) REFERENCES `localization_list`(`language`)
         ON UPDATE CASCADE
         ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE `comment_spam_ip` (
-    `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `ip` VARBINARY(16) NOT NULL,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY (`ip`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

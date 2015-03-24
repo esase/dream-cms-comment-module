@@ -196,15 +196,6 @@ msgstr "Модуль позволяет публиковать коммента�
 msgid "Comment"
 msgstr "Комментарий"
 
-msgid "Event - Adding comments spam IP"
-msgstr "Добавление спам IP комментариев"
-
-msgid "Event - Comment spam ip added by guest"
-msgstr "Гость добавил спам IP комментария с идентификатором - \"%d\""
-
-msgid "Event - Comment spam ip added by user"
-msgstr "\"%s\" добавил(а) спам IP комментария с идентификатором - \"%d\""
-
 msgid "Event - Editing comments"
 msgstr "Редактирование комментариев"
 
@@ -279,9 +270,6 @@ msgstr "Маркировка комментариев как спам"
 
 msgid "ACL - Editing comments settings in admin area"
 msgstr "Редактирование настроек комментариев в админке"
-
-msgid "ACL - Viewing comments spam IPs in admin area"
-msgstr "Просмотр спам IP-адресов комментариев в админке"
 
 msgid "ACL - Viewing comments in admin area"
 msgstr "Просмотр комментариев в админке"
