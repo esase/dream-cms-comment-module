@@ -1,0 +1,64 @@
+<?php $this->declareVars('userPage', 'commenterName', 'commenterUrl') ?>
+
+<?php 
+    $this->userPage = $this->pageUrl('user', [], null, true);
+    $this->commenterName = $this->commentCommenterName($this->vars());
+
+    $this->commenterUrl = $this->user_id && false !== $this->userPage
+        ? $this->url('page', ['page_name' => $this->userPage, 'slug' => $this->user_slug], ['force_canonical' => true])
+        : null;
+?>
+
+<li class="media<?php if (!$this->approved): ?> disapproved<?php else: ?> approved<?php endif ?><?php if ($this->own_comment): ?> own-comment<?php endif ?>" comment-id="<?php echo (int) $this->id ?>" comment-parent="<?php echo (int) $this->parent_id ?>">
+    <a name="comment-<?php echo (int) $this->id ?>"></a>
+    <?php if ($this->show_thumbs): ?>
+        <div class="media-left">
+            <?php if ($this->commenterUrl): ?>
+                <a href="<?php echo $this->commenterUrl ?>" class="thumbnail">
+                    <img alt="<?php echo $this->escapeHtmlAttr($this->commenterName) ?>" class="media-object" src="<?php echo $this->userAvatarUrl($this->user_avatar) ?>" />
+                </a>
+            <?php else: ?>
+                <div class="thumbnail">
+                    <img alt="<?php echo $this->escapeHtmlAttr($this->commenterName) ?>" class="media-object" src="<?php echo $this->userAvatarUrl($this->user_avatar) ?>" />
+                </div>
+            <?php endif ?>
+        </div>
+    <?php endif ?>
+    <div class="media-body">
+        <div class="owner">
+            <?php if ($this->commenterUrl): ?>
+                <a href="<?php echo $this->commenterUrl ?>">
+                    <?php echo $this->escapeHtml($this->commenterName) ?>
+                </a>
+            <?php else: ?>
+                <span class="comment-guest-name"><?php echo $this->escapeHtml($this->commenterName) ?></span>
+            <?php endif ?>
+            <time datetime="<?php echo $this->escapeHtmlAttr(date('Y-m-d H:i', $this->created)) ?>">
+                <?php echo $this->applicationHumanDate($this->created) ?>
+            </time>
+        </div>
+        <div class="comment">
+            <div class="comment-actions-wrapper">
+                <a class="approve-comment" href="#"><?php echo $this->translate('Approve') ?></a>
+                <a class="disapprove-comment" href="#"><?php echo $this->translate('Disapprove') ?></a>
+                <a class="spam-comment" href="#" confirm="<?php echo $this->escapeHtmlAttr($this->translate('Comment will be marked as a spam and deleted, are you sure?')) ?>"><?php echo $this->translate('Spam') ?></a>
+                <a class="delete-comment" href="#" confirm="<?php echo $this->escapeHtmlAttr($this->translate('Comment will be deleted, are you sure?')) ?>"><?php echo $this->translate('Delete') ?></a>
+                <a class="edit-comment" href="#"><?php echo $this->translate('Edit') ?></a>
+            </div>
+            <div class="comment-text">
+                <?php if (mb_strlen($this->comment) <= $this->visible_chars): ?>
+                    <?php echo  $this->escapeHtml($this->comment) ?>
+                <?php else: ?>
+                    <span><?php echo (mb_substr($this->comment, 0, $this->visible_chars)) ?><span class="comment-text-hidden"><?php echo (mb_substr($this->comment, $this->visible_chars)) ?></span></span>
+                    <a class="comment-more" href="#">
+                        <?php echo $this->translate('Show more ...') ?>
+                    </a>
+                <?php endif ?>
+            </div>
+        </div>
+        <div class="reply-link-wrapper">
+            <?php if ($this->show_reply): ?>
+                <p class="reply-comment"><a href="#"><?php echo $this->translate('Reply') ?></a></p>
+            <?php endif ?>
+        </div>
+        <ul class="comment-replies">

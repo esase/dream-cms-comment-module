@@ -1,0 +1,141 @@
+<?php $this->declareVars('subPageTitle', 'content') ?>
+<?php $this->subPageTitle = $this->translate('List of comments') ?>
+<?php $this->headTitle($this->subPageTitle) ?>
+
+<!-- render a header -->
+<?php echo $this->render('comment/comment-administration/_header') ?>
+
+<!-- render tabs -->
+<?php echo $this->partial('administration-partial/tab', [
+    'tabs' => $this->baseTabs,
+    'active' => 'list' // selected action is "list"
+]) ?>
+
+<?php $this->content = $this->partial('partial/data-grid', [
+    'controller' => 'comments-administration',
+    'action' => 'list',
+    'order_by' => $this->order_by,
+    'order_type' => $this->order_type,
+    'per_page' => $this->per_page,
+    'default_order' => 'created',
+    'default_order_type' => 'desc',
+    'filter_form' => $this->filter_form,
+    'headers' => [
+        [
+            'title' => $this->translate('ID'),
+            'order_name' => 'id'
+        ],
+        [
+            'title' => $this->translate('Commenter name')
+        ],
+        [
+            'title' => $this->translate('Email')
+        ],
+        [
+            'title' => $this->translate('IP'),
+            'order_name' => 'ip'
+        ],
+        [
+            'title' => $this->translate('Active'),
+            'order_name' => 'active'
+        ],
+        [
+            'title' => $this->translate('Date'),
+            'order_name' => 'created'
+        ],
+        [
+            'title' => $this->translate('Comment')
+        ]
+    ],
+    'paginator' => $this->paginator,
+    'skipped_fields' => [
+        'name',
+        'registred_nickname',
+        'user_id',
+        'registred_email',
+        'slug',
+        'page_slug'
+    ],
+    'helpers' => [
+        'ip' => 'applicationIp',
+        'guest_id' => 'commentCommenterName',
+        'email' => 'commentCommenterEmail',
+        'active' => 'applicationBooleanValue',
+        'created' => 'applicationDate',
+        'comment' => 'commentProcessAdminComment'
+    ],
+    'helpers_options' => [
+    ],
+    'helpers_set_array' => [
+        'guest_id' => true,
+        'email' => true,
+        'comment' => true,
+    ],
+    'actions' => [
+        'single_actions' => [
+            [
+                'name' => $this->translate('View full comment'),
+                'js' => 'showPopup(\'' . $this->url('application/page', ['controller' => 'comments-administration', 'action' => 'ajax-view-comment']) . '?id=__value__\', \'popup-view-comment-window\')',
+                'check_acl' => true,
+                'controller' => 'comments-administration',
+                'action' => 'ajax-view-comment',
+                'image' => $this->layoutAsset('icon/view_comment_action.png', 'image', 'comment')
+            ],
+            [
+                'name' => $this->translate('Edit the comment'),
+                'controller' => 'comments-administration',
+                'action' => 'edit-comment',
+                'check_acl' => true,
+                'image' => $this->layoutAsset('icon/edit_action.png', 'image')
+            ]
+        ],
+        'multiple_actions' => [
+            [
+                'name' => $this->translate('Approve selected'),
+                'controller' => 'comments-administration',
+                'action' => 'approve-comments',
+                'check_acl' => true
+            ],
+            [
+                'name' => $this->translate('Disapprove selected'),
+                'controller' => 'comments-administration',
+                'action' => 'disapprove-comments',
+                'check_acl' => true
+            ],
+            [
+                'name' => $this->translate('Delete selected'),
+                'controller' => 'comments-administration',
+                'action' => 'delete-comments',
+                'check_acl' => true,
+                'confirm' => $this->translate('Selected comments with their replies will be deleted. Are you sure?')
+            ]
+        ]
+    ],
+    'actions_options' => [
+        'action_identity' => 'id',
+        'form_name' => 'comments',
+        'multiple_actions' => [
+            'items_name' => 'comments[]'
+        ]
+    ],
+    'actions_extra_check' => [
+        'regular_actions' => [
+        ],
+        'multiple_actions' => [
+        ],
+        'single_actions' => [
+            'ajax-view-comment' => [
+                [
+                    'param' => 'comment',
+                    'condition' =>  'return mb_strlen(stripslashes("__value__")) > Application\Service\ApplicationSetting::getSetting(\'comments_length_in_admin\');'
+                ]
+            ]
+        ]
+    ]
+]) ?>
+
+<!-- render a data grid -->
+<?php echo $this->partial('administration-partial/panel', [
+    'title' => $this->translate('Comments'),
+    'body' => $this->content
+]) ?>

@@ -1,0 +1,30 @@
+<?php $this->declareVars('pageTitle') ?>
+<?php $this->pageTitle = $this->translate('Comments') ?>
+
+<?php $this->headTitle($this->escapeHtml($this->pageTitle)) ?>
+
+<div class="page-header">
+    <h1>
+        <img src="<?php  echo $this->layoutAsset('icon/comment.png', 'image', 'comment') ?>" alt="<?php echo $this->escapeHtmlAttr($this->pageTitle) ?>" />    
+        <?php echo $this->escapeHtml($this->pageTitle) ?>
+    </h1>
+</div>
+
+<?php $this->declareVars('baseTabs') ?>
+
+<?php
+    $this->baseTabs = [
+        'list' => [
+            'name' => $this->translate('List of comments'),
+            'controller' => 'comments-administration',
+            'action' => 'list',
+            'check_acl' => true
+        ],
+        'settings' => [
+            'name' => $this->translate('Settings'),
+            'controller' => 'comments-administration',
+            'action' => 'settings',
+            'check_acl' => true
+        ]
+    ]
+?>

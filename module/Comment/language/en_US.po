@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Dream CMS \"comment\" module\n"
 "POT-Creation-Date: 2013-07-19 11:59+0600\n"
-"PO-Revision-Date: 2015-02-21 12:48+0600\n"
+"PO-Revision-Date: 2015-03-22 17:16+0600\n"
 "Last-Translator: AlexE <alexermashev@gmail.com>\n"
 "Language-Team: \n"
 "Language: English\n"
@@ -15,8 +15,275 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "Your comment here ..."
+msgstr "Your comment here ..."
+
+msgid "Page name"
+msgstr "Page name"
+
+msgid "Page slug"
+msgstr "Page slug"
+
+msgid "Date end"
+msgstr "Date end"
+
+msgid "Date start"
+msgstr "Date start"
+
+msgid "Comment will be disapproved. Are you sure?"
+msgstr "Comment will be disapproved. Are you sure?"
+
+msgid "Disapprove the comment"
+msgstr "Disapprove the comment"
+
+msgid "Comment will be approved. Are you sure?"
+msgstr "Comment will be approved. Are you sure?"
+
+msgid "Approve the comment"
+msgstr "Approve the comment"
+
+msgid "Comment will be deleted with his replies. Are you sure?"
+msgstr "Comment will be deleted with his replies. Are you sure?"
+
+msgid "Delete the comment"
+msgstr "Delete the comment"
+
+msgid "Comment has been edited"
+msgstr "Comment has been edited"
+
+msgid "Edit the comment"
+msgstr "Edit the comment"
+
+msgid "The selected comment has been disapproved"
+msgstr "The selected comment has been disapproved"
+
+msgid "Selected comments have been disapproved"
+msgstr "Selected comments have been disapproved"
+
+msgid "The selected comment has been approved"
+msgstr "The selected comment has been approved"
+
+msgid "Selected comments have been approved"
+msgstr "Selected comments have been approved"
+
+msgid "The selected comment has been deleted"
+msgstr "The selected comment has been deleted"
+
+msgid "Selected comments have been deleted"
+msgstr "Selected comments have been deleted"
+
+msgid "Selected comments with their replies will be deleted. Are you sure?"
+msgstr "Selected comments with their replies will be deleted. Are you sure?"
+
+msgid "View full comment"
+msgstr "View full comment"
+
+msgid "Visible count of comments chars in admin menu"
+msgstr "Visible count of comments chars in admin menu"
+
+msgid "Commenter name"
+msgstr "Name"
+
+msgid "List of comments"
+msgstr "List of comments"
+
+msgid "List of spam IPs"
+msgstr "List of spam IPs"
+
+msgid "Show users thumbs"
+msgstr "Show users thumbs"
+
+msgid "Last comments"
+msgstr "Last comments"
+
+msgid "Reply to"
+msgstr "Reply to"
+
+msgid "View on page"
+msgstr "View on page"
+
+msgid "Count of last comments"
+msgstr "Count of last comments"
+
+msgid "Last user's comments"
+msgstr "Last user's comments"
+
+msgid "The maximum level of nested replies"
+msgstr "The maximum level of nested replies"
+
+msgid "Your IP address blocked"
+msgstr "Your IP address blocked"
+
+msgid "Comment will be marked as a spam and deleted, are you sure?"
+msgstr "Comment will be marked as a spam and deleted, are you sure?"
+
+msgid "Spam"
+msgstr "Spam"
+
+msgid "Comment reply message"
+msgstr "Comment reply message"
+
+msgid "A comment reply notification"
+msgstr "A comment reply notification"
+
+msgid "Comment reply title"
+msgstr "Comment reply title"
+
+msgid "Send notifications about new replies"
+msgstr "Send notifications about new replies"
+
+msgid "Visible count of chars in comments"
+msgstr "Visible count of chars in comments"
+
+msgid "Show more ..."
+msgstr "Show more ..."
+
+msgid "Comment will be deleted, are you sure?"
+msgstr "Comment will be deleted, are you sure?"
+
+msgid "Comment on first"
+msgstr "Comment on first"
+
+msgid "Disapprove"
+msgstr "Disapprove"
+
+msgid "Notification"
+msgstr "Notification"
+
+msgid "Approve"
+msgstr "Approve"
+
+msgid "Comment added message"
+msgstr "Comment added message"
+
+msgid "A comment add notification"
+msgstr "A comment add notification"
+
+msgid "Comment added title"
+msgstr "Comment added title"
+
+msgid "Send notifications about new comments"
+msgstr "Send notifications about new comments"
+
+msgid "Comments auto approve"
+msgstr "Comments auto approve"
+
+msgid "Reply"
+msgstr "Reply"
+
+msgid "Load more"
+msgstr "Load more"
+
+msgid "Count of comments per page"
+msgstr "Count of comments per page"
+
+msgid "Display options"
+msgstr "Display options"
+
+msgid "Error occured, please try again later"
+msgstr "Error occured, please try again later"
+
+msgid "Your comment will be available after approving"
+msgstr "Your comment will be available after approving"
+
+msgid "Comments"
+msgstr "Comments"
+
 msgid "Module allows to publish comments on the site"
 msgstr "Module allows to publish comments on the site"
 
 msgid "Comment"
 msgstr "Comment"
+
+msgid "Event - Editing comments"
+msgstr "Editing comments"
+
+msgid "Event - Comment edited by guest"
+msgstr "Guest edited the comment with id - \"%d\""
+
+msgid "Event - Comment edited by user"
+msgstr "\"%s\" edited the comment with id - \"%d\""
+
+msgid "Event - Deleting comments"
+msgstr "Deleting comments"
+
+msgid "Event - Comment deleted by guest"
+msgstr "Guest deleted the comment with id - \"%d\""
+
+msgid "Event - Comment deleted by user"
+msgstr "\"%s\" deleted the comment with id - \"%d\""
+
+msgid "Event - Disapproving comments"
+msgstr "Disapproving comments"
+
+msgid "Event - Comment disapproved by guest"
+msgstr "Guest disapproved the comment with id - \"%d\""
+
+msgid "Event - Comment disapproved by user"
+msgstr "\"%s\" disapproved the comment with id - \"%d\""
+
+msgid "Event - Approving comments"
+msgstr "Approving comments"
+
+msgid "Event - Comment approved by guest"
+msgstr "Guest approved the comment with id - \"%d\""
+
+msgid "Event - Comment approved by user"
+msgstr "\"%s\" approved the comment with id - \"%d\""
+
+msgid "Event - Adding comments"
+msgstr "Adding comments"
+
+msgid "Event - Comment added by guest"
+msgstr "Guest added the comment with id - \"%d\""
+
+msgid "Event - Comment added by user"
+msgstr "\"%s\" added the comment with id - \"%d\""
+
+msgid "ACL - Viewing comments"
+msgstr "Viewing comments"
+
+msgid "ACL - Adding comments"
+msgstr "Adding comments"
+
+msgid "ACL - Disapproving comments"
+msgstr "Disapproving comments"
+
+msgid "ACL - Approving comments"
+msgstr "Approving comments"
+
+msgid "ACL - Deleting comments"
+msgstr "Deleting comments"
+
+msgid "ACL - Deleting own comments"
+msgstr "Deleting own comments"
+
+msgid "ACL - Editing comments"
+msgstr "Editing comments"
+
+msgid "ACL - Editing own comments"
+msgstr "Editing own comments"
+
+msgid "ACL - Marking comments as spam"
+msgstr "Marking comments as spam"
+
+msgid "ACL - Editing comments settings in admin area"
+msgstr "Editing comments settings in admin area"
+
+msgid "ACL - Viewing comments in admin area"
+msgstr "Viewing comments in admin area"
+
+msgid "ACL - Viewing full comments details in admin area"
+msgstr "Viewing full comments details in admin area"
+
+msgid "ACL - Deleting comments in admin area"
+msgstr "Deleting comments in admin area"
+
+msgid "ACL - Approving comments in admin area"
+msgstr "Approving comments in admin area"
+
+msgid "ACL - Disapproving comments in admin area"
+msgstr "Disapproving comments in admin area"
+
+msgid "ACL - Editing comments in admin area"
+msgstr "Editing comments in admin area"

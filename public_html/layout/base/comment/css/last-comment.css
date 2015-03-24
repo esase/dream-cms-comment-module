@@ -1,0 +1,17 @@
+div#user-last-comments .media,
+div#last-comments .media {
+  overflow: hidden;
+}
+div#user-last-comments .media .media-left,
+div#last-comments .media .media-left {
+  min-width: 52px;
+}
+div#user-last-comments .media .media-left .media-object,
+div#last-comments .media .media-left .media-object {
+  width: 32px;
+  height: 32px;
+}
+div#user-last-comments .media .media-body span.comment-text-hidden,
+div#last-comments .media .media-body span.comment-text-hidden {
+  display: none;
+}
