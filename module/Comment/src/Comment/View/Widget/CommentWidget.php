@@ -352,8 +352,8 @@ class CommentWidget extends AbstractCommentWidget
 
             return [
                 'guest_name' => empty($commentInfo['user_id']) ? $commentInfo['name'] : null,
-                'comment' => $commentInfo && ($allowApprove
-                        || $commentInfo['active'] == CommentNestedSet::COMMENT_STATUS_ACTIVE) ? $commentInfo['comment'] : '',
+                'comment' => $commentInfo && ($allowApprove || $commentInfo['active'] == CommentNestedSet::COMMENT_STATUS_ACTIVE) 
+                        ? $this->getView()->commentProcessComment($commentInfo['comment']) : '',
 
                 'status'  => $commentStatus,
                 'message' => $commentMessage,

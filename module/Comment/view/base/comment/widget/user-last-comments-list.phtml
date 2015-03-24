@@ -36,9 +36,9 @@
                 </p>
                 <p>
                     <?php if (mb_strlen($comment->comment) <= $this->visible_chars): ?>
-                        <?php echo  $this->escapeHtml($comment->comment) ?>
+                        <?php echo  $this->commentProcessComment($comment->comment) ?>
                     <?php else: ?>
-                        <span><?php echo (mb_substr($comment->comment, 0, $this->visible_chars)) ?><span class="comment-text-hidden"><?php echo (mb_substr($comment->comment, $this->visible_chars)) ?></span></span>
+                        <span><?php echo $this->commentProcessComment(mb_substr($comment->comment, 0, $this->visible_chars)) ?><span class="comment-text-hidden"><?php echo $this->commentProcessComment(mb_substr($comment->comment, $this->visible_chars)) ?></span></span>
                         <a class="comment-more" href="#">
                             <?php echo $this->translate('Show more ...') ?>
                         </a>

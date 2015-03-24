@@ -1,5 +1,5 @@
 <div class="comment-reply-form-wrapper">
-    <?php echo $this->form()->openTag($this->comment_form->setAttribute('id', "")) ?>
+    <?php echo $this->form()->openTag($this->comment_form->setAttribute('id', '')->setAttribute('autocomplete', 'off')) ?>
         <?php echo $this->formRow($this->comment_form->get('comment')->setLabel('')->removeAttribute('id')->setAttribute('class', 'form-control primary-data')->setAttribute('placeholder', $this->translate('Your comment here ...'))) ?>
     
         <?php if ($this->guest_mode): ?>

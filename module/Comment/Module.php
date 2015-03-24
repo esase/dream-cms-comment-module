@@ -66,6 +66,7 @@ class Module
     {
         return [
             'invokables' => [
+                'commentProcessComment' => 'Comment\View\Helper\CommentProcessComment',
                 'commentProcessAdminComment' => 'Comment\View\Helper\CommentProcessAdminComment',
                 'commentCommenterName' => 'Comment\View\Helper\CommentCommenterName',
                 'commentCommenterEmail' => 'Comment\View\Helper\CommentCommenterEmail',
