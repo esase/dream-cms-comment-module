@@ -20,7 +20,7 @@ return [
     'clear_caches' => [
         'setting'       => true,
         'time_zone'     => false,
-        'admin_menu'    => false,
+        'admin_menu'    => true,
         'js_cache'      => true,
         'css_cache'     => true,
         'layout'        => false,
