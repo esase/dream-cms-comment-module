@@ -52,18 +52,6 @@ class CommentAdministrationController extends ApplicationAbstractAdministrationC
      */
     public function indexAction()
     {
-        // get settings list
-        $currentlanguage = $this->getCurrentLanguage();
-        $settings = $this->getServiceLocator()
-            ->get('Application\Model\ModelManager')
-            ->getInstance('Application\Model\ApplicationSettingAdministration');
-
-        $settings->saveSettings($settings->getSettingsList('comment', $currentlanguage), ['comments_length_in_admin' => 110], $currentlanguage, 'comment');
-                
-        echo '<pre>';
-        exit;
-        //print_r($settingsList);
-        //exit;
         // redirect to list action
         return $this->redirectTo('comments-administration', 'list');
     }
