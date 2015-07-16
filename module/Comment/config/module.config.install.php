@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'compatable' => '2.2.1',
-    'version' => '1.0.0',
+    'compatable' => '2.2.4',
+    'version' => '1.0.1',
     'vendor' => 'eSASe',
     'vendor_email' => 'alexermashev@gmail.com',
     'description' => 'Module allows to publish comments on the site',
