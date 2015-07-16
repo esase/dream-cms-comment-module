@@ -77,9 +77,6 @@
             ]) ?>
         </div>
     <?php else: ?>
-        <div class="col-md-4">
-            <?php echo $this->extraActions ?>
-        </div>
         <div class="col-md-8">
             <!-- render a form -->
             <?php echo $this->partial('administration-partial/panel', [
@@ -88,5 +85,8 @@
                 'body' => $this->partial('partial/form', ['form' => $this->comment_form])
             ]) ?>
         </div>
+       <div class="col-md-4">
+           <?php echo $this->extraActions ?>
+       </div>
     <?php endif ?>
 </div>
