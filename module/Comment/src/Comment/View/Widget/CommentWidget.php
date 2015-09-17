@@ -1,4 +1,25 @@
 <?php
+
+/**
+ * EXHIBIT A. Common Public Attribution License Version 1.0
+ * The contents of this file are subject to the Common Public Attribution License Version 1.0 (the “License”);
+ * you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ * http://www.dream-cms.kg/en/license. The License is based on the Mozilla Public License Version 1.1
+ * but Sections 14 and 15 have been added to cover use of software over a computer network and provide for
+ * limited attribution for the Original Developer. In addition, Exhibit A has been modified to be consistent
+ * with Exhibit B. Software distributed under the License is distributed on an “AS IS” basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License for the specific language
+ * governing rights and limitations under the License. The Original Code is Dream CMS software.
+ * The Initial Developer of the Original Code is Dream CMS (http://www.dream-cms.kg).
+ * All portions of the code written by Dream CMS are Copyright (c) 2014. All Rights Reserved.
+ * EXHIBIT B. Attribution Information
+ * Attribution Copyright Notice: Copyright 2014 Dream CMS. All rights reserved.
+ * Attribution Phrase (not exceeding 10 words): Powered by Dream CMS software
+ * Attribution URL: http://www.dream-cms.kg/
+ * Graphic Image as provided in the Covered Code.
+ * Display of Attribution Information is required in Larger Works which are defined in the CPAL as a work
+ * which combines Covered Code or portions thereof with code not governed by the terms of the CPAL.
+ */
 namespace Comment\View\Widget;
 
 use Acl\Service\Acl as AclService;
@@ -25,7 +46,7 @@ class CommentWidget extends AbstractCommentWidget
     /**
      * Disapprove comment
      *
-     * @apram integer $commentId
+     * @param integer $commentId
      * @return boolean|array
      */
     protected function disapproveComment($commentId)
@@ -50,7 +71,7 @@ class CommentWidget extends AbstractCommentWidget
 
             return [
                 'status' => 'error',
-                'message' => $this->translate('Error occured, please try again later')
+                'message' => $this->translate('Error occurred, please try again later')
             ];
         }
 
@@ -60,7 +81,7 @@ class CommentWidget extends AbstractCommentWidget
     /**
      * Delete comment
      *
-     * @apram integer $commentId
+     * @param integer $commentId
      * @return boolean|array
      */
     protected function deleteComment($commentId)
@@ -101,7 +122,7 @@ class CommentWidget extends AbstractCommentWidget
 
             return [
                 'status' => 'error',
-                'message' => $this->translate('Error occured, please try again later')
+                'message' => $this->translate('Error occurred, please try again later')
             ];
         }
 
@@ -111,7 +132,7 @@ class CommentWidget extends AbstractCommentWidget
     /**
      * Spam comment
      *
-     * @apram integer $commentId
+     * @param integer $commentId
      * @return boolean|array
      */
     protected function spamComment($commentId)
@@ -139,7 +160,7 @@ class CommentWidget extends AbstractCommentWidget
 
             return [
                 'status' => 'error',
-                'message' => $this->translate('Error occured, please try again later')
+                'message' => $this->translate('Error occurred, please try again later')
             ];
         }
 
@@ -149,7 +170,7 @@ class CommentWidget extends AbstractCommentWidget
     /**
      * Approve comment
      *
-     * @apram integer $commentId
+     * @param integer $commentId
      * @return boolean|array
      */
     protected function approveComment($commentId)
@@ -174,7 +195,7 @@ class CommentWidget extends AbstractCommentWidget
 
             return [
                 'status' => 'error',
-                'message' => $this->translate('Error occured, please try again later')
+                'message' => $this->translate('Error occurred, please try again later')
             ];
         }
 
@@ -245,7 +266,7 @@ class CommentWidget extends AbstractCommentWidget
                 }
                 else {
                     $commentStatus = 'error';
-                    $commentMessage = $this->translate('Error occured, please try again later');
+                    $commentMessage = $this->translate('Error occurred, please try again later');
                 }
             }
 
@@ -284,7 +305,7 @@ class CommentWidget extends AbstractCommentWidget
                     getWidgetSetting('comment_form_captcha') && UserIdentityService::isGuest();
 
             $commentStatus = 'error';
-            $commentMessage = $this->translate('Error occured, please try again later');
+            $commentMessage = $this->translate('Error occurred, please try again later');
             $commentInfo    = '';
 
             // get comment form
@@ -430,7 +451,7 @@ class CommentWidget extends AbstractCommentWidget
         }
 
         return [
-            'message' => $this->translate('Error occured, please try again later')
+            'message' => $this->translate('Error occurred, please try again later')
         ];
     }
 
@@ -558,6 +579,7 @@ class CommentWidget extends AbstractCommentWidget
      * Process comments
      *
      * @param array $comments
+     * @param boolean $asArray
      * @return string|array
      */
     protected function processComments(array $comments, $asArray = false)
@@ -581,12 +603,12 @@ class CommentWidget extends AbstractCommentWidget
                     'approved' => $comment['active'] == CommentNestedSet::COMMENT_STATUS_ACTIVE,
                     'own_comment' => $userId == $comment['user_id'] || $userId == $comment['guest_id'],
                     'visible_chars' => (int) $this->getWidgetSetting('comment_visible_chars'),
-                    'registred_nickname' => $comment['registred_nickname'],
+                    'registered_nickname' => $comment['registered_nickname'],
                     'guest_id' => $comment['guest_id'],
                     'name' => $comment['name'],
                     'user_id' => $comment['user_id'],
-                    'user_slug' => $comment['registred_slug'],
-                    'user_avatar' => $comment['registred_avatar'],
+                    'user_slug' => $comment['registered_slug'],
+                    'user_avatar' => $comment['registered_avatar'],
                     'created' => $comment['created'],
                     'show_reply' => $comment['level'] <= $maxRepliesNestedLevel,
                     'show_thumbs' => $showUsersThumbs
@@ -599,7 +621,7 @@ class CommentWidget extends AbstractCommentWidget
 
                 $content .= $this->getView()->partial('comment/widget/_comment-item-end');
 
-                // collect proccessed comments
+                // collect processed comments
                 !$asArray
                     ? $processedComments .= $content
                     : $processedComments[] = [
