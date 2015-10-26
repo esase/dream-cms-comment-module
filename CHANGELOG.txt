@@ -1,3 +1,8 @@
+Comment 1.0.3, Oct 26, 2015
+====================================
+
+- security added csrf tokens in all forms and post requests;
+
 Comment 1.0.2, Sep 17, 2015
 ====================================
 
