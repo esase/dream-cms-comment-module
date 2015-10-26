@@ -26,6 +26,7 @@ use Acl\Service\Acl as AclService;
 use Comment\Model\CommentNestedSet;
 use Page\Service\Page as PageService;
 use User\Service\UserIdentity as UserIdentityService;
+use Application\Utility\ApplicationCsrf as ApplicationCsrfUtility;
 
 class CommentWidget extends AbstractCommentWidget
 {
@@ -509,28 +510,36 @@ class CommentWidget extends AbstractCommentWidget
                         break;
 
                     case 'approve_comment' :
-                        if ($this->getRequest()->isPost()) {
+                        if ($this->getRequest()->isPost() &&
+                                ApplicationCsrfUtility::isTokenValid($this->getRequest()->getPost('csrf'))) {
+
                             return $this->getView()->json($this->
                                     approveComment($this->getRequest()->getQuery('widget_comment_id', -1)));
                         }
                         break;
 
                     case 'disapprove_comment' :
-                        if ($this->getRequest()->isPost()) {
+                        if ($this->getRequest()->isPost() &&
+                                ApplicationCsrfUtility::isTokenValid($this->getRequest()->getPost('csrf'))) {
+
                             return $this->getView()->json($this->
                                     disapproveComment($this->getRequest()->getQuery('widget_comment_id', -1)));
                         }
                         break;
 
                     case 'delete_comment' :
-                        if ($this->getRequest()->isPost()) {
+                        if ($this->getRequest()->isPost() &&
+                                ApplicationCsrfUtility::isTokenValid($this->getRequest()->getPost('csrf'))) {
+
                             return $this->getView()->json($this->
                                     deleteComment($this->getRequest()->getQuery('widget_comment_id', -1)));
                         }
                         break;
 
                     case 'spam_comment' :
-                        if ($this->getRequest()->isPost()) {
+                        if ($this->getRequest()->isPost() &&
+                                ApplicationCsrfUtility::isTokenValid($this->getRequest()->getPost('csrf'))) {
+
                             return $this->getView()->json($this->
                                     spamComment($this->getRequest()->getQuery('widget_comment_id', -1)));
                         }
@@ -539,6 +548,7 @@ class CommentWidget extends AbstractCommentWidget
             }
 
             return $this->getView()->partial('comment/widget/comments-list', [
+                'csrf_token' => ApplicationCsrfUtility::getToken(),
                 'base_url' => $this->getWidgetConnectionUrl(),
                 'comment_form' => AclService::checkPermission('comment_add', false) ? $this->getCommentForm()['form'] : null,
                 'comments' => $this->getCommentsList($allowApprove),

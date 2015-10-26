@@ -177,7 +177,7 @@ INSERT INTO `page_widget_setting_default_value` (`setting_id`, `value`, `languag
 (@widgetSettingId, '450', NULL);
 
 INSERT INTO `page_widget_setting` (`name`, `widget`, `label`, `type`, `required`, `order`, `category`, `description`, `check`,  `check_message`, `values_provider`) VALUES
-('comment_max_nested_level', @widgetId, 'The maximum level of nested replies', 'integer', 1, 4, @displaySettingCategoryId, NULL, 'return intval(''__value__'') > 0;', 'Value should be greater than 0', NULL);
+('comment_max_nested_level', @widgetId, 'The maximum level of nested replies', 'integer', 1, 4, @displaySettingCategoryId, NULL, 'return intval(''__value__'') >= 0;', 'Max nested level should be greater or equals 0', NULL);
 SET @widgetSettingId = (SELECT LAST_INSERT_ID());
 
 INSERT INTO `page_widget_setting_default_value` (`setting_id`, `value`, `language`) VALUES

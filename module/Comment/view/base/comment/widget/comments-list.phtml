@@ -40,6 +40,7 @@
 
     // init comments
     comment.setBaseUrl("<?php echo $this->escapeJs($this->base_url) ?>")
+        .setCsrfToken("<?php echo $this->escapeJs($this->csrf_token) ?>")
         .setAccessDeniedMessage("<?php echo $this->escapeJs($this->translate('Access Denied')) ?>")
         .allowAddComments(<?php echo $this->aclCheckPermission("comment_add") ? 'true' : 'false' ?>)
         .allowApproveComments(<?php echo $this->aclCheckPermission("comment_approve") ? 'true' : 'false' ?>)
