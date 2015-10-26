@@ -40,7 +40,7 @@
         'name' => $this->translate('Delete the comment'),
         'check_acl' => true,
         'confirm' => $this->translate('Comment will be deleted with his replies. Are you sure?'),
-        'confirm_callback' => "function(link) { $.post($(link).attr('href'), {'comments' : [{$this->comment['id']}]}, function(){location.href='{$this->url('application/page', ['controller' => 'comments-administration', 'action' => 'list'], ['force_canonical' => true])}'}) }"
+        'confirm_callback' => "function(link) { $.post($(link).attr('href'), {'csrf' : '{$this->csrf_token}', 'comments' : [{$this->comment['id']}]}, function(){location.href='{$this->url('application/page', ['controller' => 'comments-administration', 'action' => 'list'], ['force_canonical' => true])}'}) }"
     ],
     [
         'hide_action' => CommentNestedSetModel::COMMENT_STATUS_ACTIVE == $this->comment['active'],
@@ -49,7 +49,7 @@
         'name' => $this->translate('Approve the comment'),
         'check_acl' => true,
         'confirm' => $this->translate('Comment will be approved. Are you sure?'),
-        'confirm_callback' => "function(link) { $.post($(link).attr('href'), {'comments' : [{$this->comment['id']}]}, function(){location.href='{$this->url('application/page', ['controller' => 'comments-administration', 'action' => 'edit-comment', 'slug' => $this->comment['id']], ['force_canonical' => true])}'}) }"
+        'confirm_callback' => "function(link) { $.post($(link).attr('href'), {'csrf' : '{$this->csrf_token}', 'comments' : [{$this->comment['id']}]}, function(){location.href='{$this->url('application/page', ['controller' => 'comments-administration', 'action' => 'edit-comment', 'slug' => $this->comment['id']], ['force_canonical' => true])}'}) }"
     ],
     [
         'hide_action' => CommentNestedSetModel::COMMENT_STATUS_NOT_ACTIVE == $this->comment['active'],
@@ -58,7 +58,7 @@
         'name' => $this->translate('Disapprove the comment'),
         'check_acl' => true,
         'confirm' => $this->translate('Comment will be disapproved. Are you sure?'),
-        'confirm_callback' => "function(link) { $.post($(link).attr('href'), {'comments' : [{$this->comment['id']}]}, function(){location.href='{$this->url('application/page', ['controller' => 'comments-administration', 'action' => 'edit-comment', 'slug' => $this->comment['id']], ['force_canonical' => true])}'}) }"
+        'confirm_callback' => "function(link) { $.post($(link).attr('href'), {'csrf' : '{$this->csrf_token}', 'comments' : [{$this->comment['id']}]}, function(){location.href='{$this->url('application/page', ['controller' => 'comments-administration', 'action' => 'edit-comment', 'slug' => $this->comment['id']], ['force_canonical' => true])}'}) }"
     ]]
 ]))
 ?>

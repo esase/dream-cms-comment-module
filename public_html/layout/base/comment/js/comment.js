@@ -7,72 +7,91 @@ function Comment(translationsList)
 {
     /**
      * Translations
+     *
      * @var object
      */
     var translations = translationsList;
 
     /**
-     * Allow add comments
+     * Allow to add comments
+     *
      * @var boolean
      */
     var allowAddComments = false;
 
     /**
-     * Allow approve comments
+     * Allow to approve comments
+     *
      * @var boolean
      */
     var allowApproveComments = false;
 
     /**
-     * Allow disapprove comments
+     * Allow to disapprove comments
+     *
      * @var boolean
      */
     var allowDisapproveComments = false;
 
     /**
-     * Allow delete comments
+     * Allow to delete comments
+     *
      * @var boolean
      */
     var allowDeleteComments = false;
 
     /**
-     * Allow delete own comments
+     * Allow to delete own comments
+     *
      * @var boolean
      */
     var allowDeleteOwnComments = false;
 
     /**
-     * Allow edit comments
+     * Allow to edit comments
+     *
      * @var boolean
      */
     var allowEditComments = false;
 
     /**
-     * Allow edit own comments
+     * Allow to edit own comments
+     *
      * @var boolean
      */
     var allowEditOwnComments = false;
 
     /**
-     * Allow spam comments
+     * Allow to spam comments
+     *
      * @var boolean
      */
     var allowSpamComments = false;
 
     /**
      * Base url
+     *
      * @var string
      */
     var baseUrl;
 
     /**
+     * Csrf token
+     *
+     * @var string
+     */
+    var csrfToken;
+
+    /**
      * Access denied message
+     *
      * @var string
      */
     var accessDeniedMessage;
 
     /**
      * Comments structure
+     *
      * @var array
      */
     var commentsStructure = [];
@@ -87,7 +106,7 @@ function Comment(translationsList)
      */
     var showNotification = function(message)
     {
-        $notification = $("#comment-notification-wrapper");
+        var $notification = $("#comment-notification-wrapper");
         $notification.find("#comment-notification").html(message);
 
         $notification.modal("show");
@@ -100,7 +119,7 @@ function Comment(translationsList)
      */
     var initReplyLinks = function()
     {
-        // listen for all reply links clicks
+        // listen to all reply links click
         $("#global-comments-wrapper #comments-list-wrapper .reply-link-wrapper a").off().bind("click", function(e){
             e.preventDefault();
 
@@ -186,7 +205,7 @@ function Comment(translationsList)
                     removeAllActionsElements();
                     showNotification(accessDeniedMessage);
                 }                    
-            }, "post", "", false);
+            }, "post", {"csrf" : csrfToken}, false);
         });
     }
 
@@ -242,7 +261,7 @@ function Comment(translationsList)
                     removeAllActionsElements();
                     showNotification(accessDeniedMessage);
                 }                    
-            }, "post", "", false);
+            }, "post", {"csrf" : csrfToken}, false);
         });
     }
 
@@ -294,7 +313,7 @@ function Comment(translationsList)
                         removeAllActionsElements();
                         showNotification(accessDeniedMessage);
                     }                    
-                }, "post", "", false);
+                }, "post", {"csrf" : csrfToken}, false);
             });
         });
     }
@@ -347,7 +366,7 @@ function Comment(translationsList)
                         removeAllActionsElements();
                         showNotification(accessDeniedMessage);
                     }                    
-                }, "post", "", false);
+                }, "post", {"csrf" : csrfToken}, false);
             });
         });
     }
@@ -719,7 +738,8 @@ function Comment(translationsList)
     var addComments = function(comments, isOwnReply)
     {
         removeEmptyCommentsWrapper();
-        $commentsList = $("#global-comments-wrapper #comments-list-wrapper");
+        var $commentsList = $("#global-comments-wrapper #comments-list-wrapper");
+
         $.each(comments, function(key, value) {
             // add the comment
             var $comment = $(value.comment);
@@ -941,6 +961,7 @@ function Comment(translationsList)
     this.setAccessDeniedMessage = function(message)
     {
         accessDeniedMessage = message;
+
         return this;
     }
 
@@ -953,6 +974,20 @@ function Comment(translationsList)
     this.setBaseUrl = function(url)
     {
         baseUrl = url;
+
+        return this;
+    }
+
+    /**
+     * Set csrf token
+     *
+     * @param string csrf
+     * @return object
+     */
+    this.setCsrfToken = function(csrf)
+    {
+        csrfToken = csrf;
+
         return this;
     }
 
@@ -965,6 +1000,7 @@ function Comment(translationsList)
     this.allowAddComments = function(allowed)
     {
         allowAddComments = allowed;
+
         return this;
     }
 
@@ -977,6 +1013,7 @@ function Comment(translationsList)
     this.allowApproveComments = function(allowed)
     {
         allowApproveComments = allowed;
+
         return this;
     }
 
@@ -989,6 +1026,7 @@ function Comment(translationsList)
     this.allowDisapproveComments = function(allowed)
     {
         allowDisapproveComments = allowed;
+
         return this;
     }
 
@@ -1001,6 +1039,7 @@ function Comment(translationsList)
     this.allowDeleteComments = function(allowed)
     {
         allowDeleteComments = allowed;
+
         return this;
     }
 
@@ -1013,6 +1052,7 @@ function Comment(translationsList)
     this.allowDeleteOwnComments = function(allowed)
     {
         allowDeleteOwnComments = allowed;
+
         return this;
     }
 
@@ -1025,6 +1065,7 @@ function Comment(translationsList)
     this.allowEditComments = function(allowed)
     {
         allowEditComments = allowed;
+
         return this;
     }
 
@@ -1037,6 +1078,7 @@ function Comment(translationsList)
     this.allowEditOwnComments = function(allowed)
     {
         allowEditOwnComments = allowed;
+
         return this;
     }
 
@@ -1049,6 +1091,7 @@ function Comment(translationsList)
     this.allowSpamComments = function(allowed)
     {
         allowSpamComments = allowed;
+
         return this;
     }
 

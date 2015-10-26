@@ -144,7 +144,9 @@ class CommentAdministrationController extends ApplicationAbstractAdministrationC
     {
         $request = $this->getRequest();
 
-        if ($request->isPost()) {
+        if ($request->isPost() &&
+                $this->applicationCsrf()->isTokenValid($request->getPost('csrf'))) {
+
             if (null !== ($commentsIds = $request->getPost('comments', null))) {
                 // delete selected comments
                 $deleteResult = false;
@@ -205,7 +207,9 @@ class CommentAdministrationController extends ApplicationAbstractAdministrationC
     {
         $request = $this->getRequest();
 
-        if ($request->isPost()) {
+        if ($request->isPost() &&
+                $this->applicationCsrf()->isTokenValid($request->getPost('csrf'))) {
+
             if (null !== ($commentsIds = $request->getPost('comments', null))) {
                 // approve selected comments
                 $approveResult = false;
@@ -265,7 +269,9 @@ class CommentAdministrationController extends ApplicationAbstractAdministrationC
     {
         $request = $this->getRequest();
 
-        if ($request->isPost()) {
+        if ($request->isPost() &&
+                $this->applicationCsrf()->isTokenValid($request->getPost('csrf'))) {
+
             if (null !== ($commentsIds = $request->getPost('comments', null))) {
                 // disapprove selected comments
                 $disapproveResult = false;
@@ -381,6 +387,7 @@ class CommentAdministrationController extends ApplicationAbstractAdministrationC
         }
 
         return new ViewModel([
+            'csrf_token' => $this->applicationCsrf()->getToken(),
             'comment_form' => $commentForm->getForm(),
             'comment' => $comment
         ]);
